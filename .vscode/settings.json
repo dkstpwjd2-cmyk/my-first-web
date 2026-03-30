@@ -1,0 +1,5 @@
+{
+  "typescript.tsserver.maxTsServerMemory": 2048,
+  "typescript.disableAutomaticTypeAcquisition": true,
+  "editor.semanticHighlighting.enabled": false
+}
