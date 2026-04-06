@@ -1,33 +1,33 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import Link from "next/link";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "안세정의 블로그",
-  description: "일상, 운동, 학교생활을 기록합니다.",
+  title: "내 블로그",
+  description: "웹 개발을 배우며 기록하는 공간",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="ko">
+      <body>
+        <nav className="bg-gray-800 text-white p-4 flex gap-6 items-center">
+          <Link href="/" className="font-bold hover:text-gray-300">내 블로그</Link>
+          <Link href="/" className="text-sm hover:text-gray-300">홈</Link>
+          <Link href="/posts" className="text-sm hover:text-gray-300">블로그</Link>
+          <Link href="/posts/new" className="text-sm hover:text-gray-300">새 글 쓰기</Link>
+        </nav>
+        <main className="max-w-4xl mx-auto p-6">
+          {children}
+        </main>
+        <footer className="text-center text-gray-500 py-4">
+          © 2026 내 블로그
+        </footer>
+      </body>
     </html>
   );
 }
