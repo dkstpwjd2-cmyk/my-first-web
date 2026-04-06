@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { posts } from "@/lib/posts";
 
+const categoryColor: Record<string, string> = {
+  일상: "bg-amber-50 text-amber-600",
+  운동: "bg-emerald-50 text-emerald-600",
+  학교생활: "bg-indigo-50 text-indigo-600",
+};
+
 export default async function PostDetailPage({
   params,
 }: {
@@ -22,13 +28,15 @@ export default async function PostDetailPage({
 
   return (
     <article className="max-w-2xl mx-auto p-6">
-      <h1 className="text-3xl font-bold">{post.title}</h1>
-      <div className="flex gap-2 text-sm text-gray-500 mt-2">
-        <span>{post.author}</span>
-        <span>·</span>
-        <span>{post.date}</span>
+      <div className="flex items-center gap-2 mb-4">
+        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${categoryColor[post.category] ?? "bg-gray-100 text-gray-500"}`}>
+          {post.category}
+        </span>
+        <span className="text-sm text-gray-400">{post.date}</span>
       </div>
-      <div className="mt-6 leading-relaxed">{post.content}</div>
+      <h1 className="text-3xl font-bold mb-2">{post.title}</h1>
+      <p className="text-sm text-gray-500 mb-6">{post.author}</p>
+      <div className="leading-relaxed text-gray-700 whitespace-pre-line">{post.content}</div>
       <Link href="/posts" className="text-blue-500 underline mt-8 block">
         ← 목록으로 돌아가기
       </Link>

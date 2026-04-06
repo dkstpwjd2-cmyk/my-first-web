@@ -3,8 +3,8 @@ import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "내 블로그",
-  description: "웹 개발을 배우며 기록하는 공간",
+  title: "안세정의 블로그",
+  description: "일상, 운동, 학교생활을 기록합니다.",
 };
 
 export default function RootLayout({
