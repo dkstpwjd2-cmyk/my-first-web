@@ -8,7 +8,7 @@ export type Post = {
   excerpt: string;
 };
 
-export const posts: Post[] = [
+const initialPosts: Post[] = [
   {
     id: 1,
     title: "첫 번째 블로그 포스트",
@@ -67,3 +67,63 @@ export const posts: Post[] = [
 앞으로도 학교생활 이야기 자주 올릴게요!`,
   },
 ];
+
+let runtimePosts: Post[] = [...initialPosts];
+
+export function getPosts(): Post[] {
+  return runtimePosts;
+}
+
+export function getPostById(id: number): Post | undefined {
+  return runtimePosts.find((post) => post.id === id);
+}
+
+function formatDate(value: Date): string {
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(value);
+}
+
+function buildExcerpt(content: string, maxLength = 70): string {
+  const normalized = content.replace(/\s+/g, " ").trim();
+
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
+
+  return `${normalized.slice(0, maxLength)}...`;
+}
+
+export function createPost(input: {
+  title: string;
+  content: string;
+  category: string;
+  author?: string;
+}): Post {
+  const title = input.title.trim();
+  const content = input.content.trim();
+  const category = input.category.trim() || "일상";
+  const author = input.author?.trim() || "안세정";
+  const maxId = runtimePosts.reduce((acc, post) => Math.max(acc, post.id), 0);
+
+  const newPost: Post = {
+    id: maxId + 1,
+    title,
+    content,
+    author,
+    category,
+    date: formatDate(new Date()),
+    excerpt: buildExcerpt(content),
+  };
+
+  runtimePosts = [newPost, ...runtimePosts];
+  return newPost;
+}
+
+export function deletePostById(id: number): boolean {
+  const beforeCount = runtimePosts.length;
+  runtimePosts = runtimePosts.filter((post) => post.id !== id);
+  return runtimePosts.length < beforeCount;
+}
