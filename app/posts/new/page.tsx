@@ -1,13 +1,24 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function NewPostPage() {
   const router = useRouter();
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    if (!title.trim()) {
+      alert("제목을 입력해주세요");
+      return;
+    }
+
     alert("저장되었습니다");
+    setTitle("");
+    setContent("");
     router.push("/posts");
   }
 
@@ -16,13 +27,15 @@ export default function NewPostPage() {
       <h1 className="text-2xl font-bold">새 글 쓰기</h1>
       <input
         type="text"
+        value={title}
+        onChange={(event) => setTitle(event.target.value)}
         placeholder="제목"
-        required
         className="w-full p-3 border rounded-lg"
       />
       <textarea
+        value={content}
+        onChange={(event) => setContent(event.target.value)}
         placeholder="내용"
-        required
         className="w-full p-3 border rounded-lg h-40"
       />
       <button

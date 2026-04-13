@@ -1,65 +1,72 @@
-import Link from "next/link";
-import { revalidatePath } from "next/cache";
-import { deletePostById, getPosts } from "@/lib/posts";
+import { getPosts } from "@/lib/posts";
+import PostsClient, { type PostsListItem } from "./posts-client";
 
 export const dynamic = "force-dynamic";
 
-const categoryColor: Record<string, string> = {
-  일상: "bg-amber-50 text-amber-600",
-  운동: "bg-emerald-50 text-emerald-600",
-  학교생활: "bg-indigo-50 text-indigo-600",
+type JsonPlaceholderPost = {
+  id: number;
+  title: string;
+  body: string;
 };
 
-async function deletePostAction(formData: FormData) {
-  "use server";
+const categories = ["일상", "운동", "학교생활"];
 
-  const id = Number(formData.get("id"));
-  if (!Number.isFinite(id)) {
-    return;
-  }
-
-  deletePostById(id);
-  revalidatePath("/posts");
-  revalidatePath(`/posts/${id}`);
+function formatDate(value: Date): string {
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(value);
 }
 
-export default function PostsPage() {
-  const posts = getPosts();
+function buildExcerpt(content: string, maxLength = 70): string {
+  const normalized = content.replace(/\s+/g, " ").trim();
+
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
+
+  return `${normalized.slice(0, maxLength)}...`;
+}
+
+async function fetchPosts(): Promise<PostsListItem[]> {
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts?_limit=3", {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error("failed to fetch posts");
+    }
+
+    const apiPosts = (await response.json()) as JsonPlaceholderPost[];
+
+    return apiPosts.map((post, index) => ({
+      id: post.id,
+      title: post.title,
+      excerpt: buildExcerpt(post.body),
+      category: categories[index % categories.length],
+      date: formatDate(new Date()),
+    }));
+  } catch {
+    const fallbackPosts = getPosts();
+    return fallbackPosts.map((post) => ({
+      id: post.id,
+      title: post.title,
+      excerpt: post.excerpt,
+      category: post.category,
+      date: post.date,
+    }));
+  }
+}
+
+export default async function PostsPage() {
+  const posts = await fetchPosts();
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">블로그</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {posts.map((post) => (
-          <article key={post.id} className="p-4 border rounded-lg hover:shadow-lg transition">
-            <div className="flex items-center gap-2 mb-2">
-              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${categoryColor[post.category] ?? "bg-gray-100 text-gray-500"}`}>
-                {post.category}
-              </span>
-              <span className="text-sm text-gray-400">{post.date}</span>
-            </div>
-            <h2 className="font-bold mb-1">{post.title}</h2>
-            <p className="text-sm text-gray-600">{post.excerpt}</p>
-            <div className="mt-4 flex items-center gap-3">
-              <Link
-                href={`/posts/${post.id}`}
-                className="text-sm text-blue-600 hover:underline"
-              >
-                자세히 보기
-              </Link>
-              <form action={deletePostAction}>
-                <input type="hidden" name="id" value={String(post.id)} />
-                <button
-                  type="submit"
-                  className="text-sm text-red-600 hover:underline"
-                >
-                  삭제
-                </button>
-              </form>
-            </div>
-          </article>
-        ))}
-      </div>
+      <PostsClient initialPosts={posts} />
     </div>
   );
 }
