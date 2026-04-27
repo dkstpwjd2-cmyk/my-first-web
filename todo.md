@@ -74,5 +74,5 @@
 
 - [x] Prepared current project work for commit.
 - [x] Excluded local dev server logs with `.gitignore`.
-- [ ] Commit current work.
-- [ ] Push commit to `origin`.
+- [x] Commit current work.
+- [x] Push commit to `origin`.

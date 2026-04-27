@@ -67,5 +67,6 @@
 
 ## 2026-04-27 save and upload
 
-- Preparing to commit and push the current project work.
+- Committed current project work as `c6dfad0` with message `Apply shadcn blog UI and project instructions`.
+- Pushed `master` to `origin`.
 - Added `next-dev.log` and `next-dev.err` to `.gitignore` because they are local dev server logs, not project source.
