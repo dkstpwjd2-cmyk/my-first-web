@@ -1,49 +1,84 @@
-"use client";
+import Link from "next/link";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { createPost } from "@/lib/posts";
 
-export default function NewPostPage() {
-  const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+async function createPostAction(formData: FormData) {
+  "use server";
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  const title = String(formData.get("title") ?? "");
+  const content = String(formData.get("content") ?? "");
+  const category = String(formData.get("category") ?? "일상");
 
-    if (!title.trim()) {
-      alert("제목을 입력해주세요");
-      return;
-    }
-
-    alert("저장되었습니다");
-    setTitle("");
-    setContent("");
-    router.push("/posts");
+  if (title.trim() && content.trim()) {
+    createPost({ title, content, category });
+    revalidatePath("/posts");
   }
 
+  redirect("/posts");
+}
+
+export default function NewPostPage() {
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-6 space-y-4">
-      <h1 className="text-2xl font-bold">새 글 쓰기</h1>
-      <input
-        type="text"
-        value={title}
-        onChange={(event) => setTitle(event.target.value)}
-        placeholder="제목"
-        className="w-full p-3 border rounded-lg"
-      />
-      <textarea
-        value={content}
-        onChange={(event) => setContent(event.target.value)}
-        placeholder="내용"
-        className="w-full p-3 border rounded-lg h-40"
-      />
-      <button
-        type="submit"
-        className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-      >
-        저장하기
-      </button>
-    </form>
+    <Card className="rounded-lg shadow-sm">
+      <CardHeader>
+        <CardTitle>포스트 작성</CardTitle>
+        <CardDescription>
+          제목과 내용을 입력하면 포스트 목록에 새 글이 추가됩니다.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form action={createPostAction} className="space-y-6">
+          <div className="space-y-2">
+            <label htmlFor="title" className="text-sm font-medium">
+              제목
+            </label>
+            <Input id="title" name="title" required placeholder="제목을 입력하세요" />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="category" className="text-sm font-medium">
+              카테고리
+            </label>
+            <Input
+              id="category"
+              name="category"
+              defaultValue="일상"
+              placeholder="일상"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="content" className="text-sm font-medium">
+              내용
+            </label>
+            <Textarea
+              id="content"
+              name="content"
+              required
+              placeholder="내용을 입력하세요"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button type="submit">저장하기</Button>
+            <Button asChild type="button" variant="outline">
+              <Link href="/posts">취소</Link>
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

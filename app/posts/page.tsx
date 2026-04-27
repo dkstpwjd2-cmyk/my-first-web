@@ -1,72 +1,59 @@
+import Link from "next/link";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { getPosts } from "@/lib/posts";
-import PostsClient, { type PostsListItem } from "./posts-client";
-
-export const dynamic = "force-dynamic";
-
-type JsonPlaceholderPost = {
-  id: number;
-  title: string;
-  body: string;
-};
-
-const categories = ["일상", "운동", "학교생활"];
-
-function formatDate(value: Date): string {
-  return new Intl.DateTimeFormat("ko-KR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(value);
-}
-
-function buildExcerpt(content: string, maxLength = 70): string {
-  const normalized = content.replace(/\s+/g, " ").trim();
-
-  if (normalized.length <= maxLength) {
-    return normalized;
-  }
-
-  return `${normalized.slice(0, maxLength)}...`;
-}
-
-async function fetchPosts(): Promise<PostsListItem[]> {
-  try {
-    const response = await fetch("https://jsonplaceholder.typicode.com/posts?_limit=3", {
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      throw new Error("failed to fetch posts");
-    }
-
-    const apiPosts = (await response.json()) as JsonPlaceholderPost[];
-
-    return apiPosts.map((post, index) => ({
-      id: post.id,
-      title: post.title,
-      excerpt: buildExcerpt(post.body),
-      category: categories[index % categories.length],
-      date: formatDate(new Date()),
-    }));
-  } catch {
-    const fallbackPosts = getPosts();
-    return fallbackPosts.map((post) => ({
-      id: post.id,
-      title: post.title,
-      excerpt: post.excerpt,
-      category: post.category,
-      date: post.date,
-    }));
-  }
-}
 
 export default async function PostsPage() {
-  const posts = await fetchPosts();
+  const posts = getPosts();
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">블로그</h1>
-      <PostsClient initialPosts={posts} />
+    <div className="space-y-6">
+      <section className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-normal">포스트 목록</h1>
+          <p className="text-sm text-muted-foreground">
+            작성한 포스트를 확인하고 상세 페이지로 이동할 수 있습니다.
+          </p>
+        </div>
+        <Button asChild>
+          <Link href="/posts/new">새 포스트 작성</Link>
+        </Button>
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {posts.map((post) => (
+          <Card key={post.id} className="rounded-lg shadow-sm">
+            <CardHeader>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="rounded-lg bg-accent px-2 py-1 text-accent-foreground">
+                  {post.category}
+                </span>
+                <span>{post.date}</span>
+              </div>
+              <CardTitle>{post.title}</CardTitle>
+              <CardDescription>{post.excerpt}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                작성자 {post.author}
+              </p>
+            </CardContent>
+            <CardFooter>
+              <Button asChild variant="outline">
+                <Link href={`/posts/${post.id}`}>상세 보기</Link>
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
+      </section>
     </div>
   );
 }

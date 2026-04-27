@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
+
+import Navigation from "@/components/Navigation";
+
 import "./globals.css";
-import Navigation from "./components/navigation";
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: "안세정의 블로그",
-  description: "일상, 운동, 학교생활을 기록합니다.",
+  title: "My First Web",
+  description: "Next.js App Router로 만든 포스트 웹페이지입니다.",
 };
 
 export default function RootLayout({
@@ -13,14 +19,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko">
+    <html lang="ko" className={cn("font-sans", geist.variable)}>
       <body>
         <Navigation />
-        <main className="max-w-4xl mx-auto p-6">
-          {children}
-        </main>
-        <footer className="text-center text-gray-500 py-4">
-          © 2026 내 블로그
+        <main className="mx-auto max-w-4xl space-y-6 p-6">{children}</main>
+        <footer className="mx-auto max-w-4xl px-6 py-6 text-sm text-[var(--muted-foreground)]">
+          © 2026 My First Web
         </footer>
       </body>
     </html>
