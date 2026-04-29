@@ -70,3 +70,12 @@
 - Committed current project work as `c6dfad0` with message `Apply shadcn blog UI and project instructions`.
 - Pushed `master` to `origin`.
 - Added `next-dev.log` and `next-dev.err` to `.gitignore` because they are local dev server logs, not project source.
+
+## 2026-04-29 Ch7 아키텍처 설계서 보강
+
+- `ARCHITECTURE.md` 신규 생성: 페이지 맵, 유저 플로우 3종(글 읽기·글 작성·마이페이지), 컴포넌트 계층, 데이터 모델(profiles + posts 테이블 + 1:N 관계) 포함.
+- `app/signup/page.tsx` 신규 생성: 페이지 맵에 정의된 `/signup` 라우트를 shadcn/ui Card + Input + Button으로 구현.
+- AI 와이어프레임 2장 생성: 홈 페이지(카드 목록) + 포스트 작성 페이지 (AI 이미지 생성).
+- 현재 완료 페이지: `/`(홈), `/posts`(목록), `/posts/[id]`(상세), `/posts/new`(작성), `/login`(로그인), `/mypage`(마이페이지), `/signup`(회원가입) 총 7개.
+- 데이터: 여전히 `lib/posts.ts` 인메모리 데이터 사용 (Supabase 연결은 Ch8 예정).
+- 남은 이슈: `app/posts/posts-client.tsx`의 `search-bar` import 오류, 빌드 실패(폰트 네트워크) 미해결.

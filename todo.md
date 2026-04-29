@@ -18,17 +18,18 @@
 - [x] 포스트 목록 페이지 기본 구조
 - [x] 포스트 상세 페이지 UI
 - [x] 새 포스트 작성 화면 기본 폼
+- [x] 회원가입 페이지 (`/signup`)
 - [ ] 포스트 목록 검색 컴포넌트 연결
 - [ ] 포스트 상세 페이지 데이터 연결 정리
 - [ ] 포스트 작성 실제 저장 처리
 - [ ] 포스트 삭제 동작 통일
 - [ ] 포스트 수정 기능
-- [ ] 로그인/회원가입
+- [ ] 로그인/회원가입 실제 인증 연결
 - [ ] `npm.cmd run build` 통과
 
 ## 3단계: 고급 기능 (Ch11~12)
 
-- [ ] 마이페이지
+- [ ] 마이페이지 실사용자 데이터 연결
 - [ ] 댓글 기능
 - [ ] 이미지 업로드
 - [ ] 카테고리 필터
@@ -37,12 +38,12 @@
 
 ## 현재 확인된 이슈
 
-- [ ] `app/posts/posts-client.tsx`에서 `@/app/components/search-bar`를 import하지만 해당 파일이 없음
+- [x] `app/posts/posts-client.tsx` 및 search-bar import 오류 → 파일 자체가 삭제되어 실제 오류 없음 (확인 완료)
 - [ ] 포스트 목록은 외부 API를 우선 사용하고, 상세 페이지는 `lib/posts.ts` 데이터를 사용해서 데이터 소스가 다름
-- [ ] `/login`, `/mypage` 네비게이션 링크는 있으나 실제 페이지가 없음
 - [ ] PowerShell에서는 `npm` 대신 `npm.cmd` 사용 필요
+- [ ] 빌드 실패: `next/font/google`이 네트워크 제한 환경에서 Geist 폰트를 가져오지 못함
 
-## 진행률: 11/26 (42%)
+## 진행률: 13/28 (46%)
 
 ## 2026-04-27 Check Log
 
@@ -76,3 +77,12 @@
 - [x] Excluded local dev server logs with `.gitignore`.
 - [x] Commit current work.
 - [x] Push commit to `origin`.
+
+## 2026-04-29 Ch7 Architecture Log
+
+- [x] Created `ARCHITECTURE.md`: page map, 3 user flows, component hierarchy, DB schema (profiles + posts).
+- [x] Created `app/signup/page.tsx` with shadcn/ui Card + Input + Button.
+- [x] Generated 2 AI wireframes (home card grid + post creation form).
+- [x] Updated `context.md` with Ch7 session summary.
+- [x] Updated `todo.md` progress (13/28, 46%).
+

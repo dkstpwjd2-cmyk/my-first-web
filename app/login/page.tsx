@@ -1,8 +1,11 @@
+import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -10,7 +13,7 @@ import { Input } from "@/components/ui/input";
 
 export default function LoginPage() {
   return (
-    <Card>
+    <Card className="mx-auto max-w-sm">
       <CardHeader>
         <CardTitle>로그인</CardTitle>
         <CardDescription>
@@ -31,9 +34,16 @@ export default function LoginPage() {
             </label>
             <Input id="password" name="password" type="password" />
           </div>
-          <Button type="submit">로그인</Button>
+          <Button type="submit" className="w-full">로그인</Button>
         </form>
       </CardContent>
+      <CardFooter className="justify-center text-sm text-muted-foreground">
+        계정이 없으신가요?&nbsp;
+        <Link href="/signup" className="text-primary underline-offset-4 hover:underline">
+          회원가입
+        </Link>
+      </CardFooter>
     </Card>
   );
 }
+
