@@ -148,8 +148,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGci...
 ```
 
 예시:
-NEXT_PUBLIC_SUPABASE_URL=https://funrzrhyvotqkyhtoblv.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1bnJ6cmh5dm90cWt5aHRvYmx2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3OTI5MjQsImV4cCI6MjA5MzM2ODkyNH0.Tp2NdoXpOEClEGD6l0pHHxd_7ghNH29xsvcux1GztS8
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 
 > **anon 키는 공개해도 안전한가?** 그렇다. 진짜 보안은 RLS(Ch11). anon 키는 "집 주소", RLS는 "잠금 장치".
 > 
