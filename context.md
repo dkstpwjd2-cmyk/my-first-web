@@ -2,10 +2,11 @@
 
 ## 현재 상태
 
-- 마지막 작업일: 2026-04-27
-- 완료된 작업: 홈 페이지, 헤더/푸터 레이아웃, 포스트 목록 기본 구조, 포스트 상세 페이지 UI, 새 글 작성 화면 기본 폼
-- 진행 중: 포스트 목록 검색 기능, 포스트 상세 데이터 연결, 글 작성/삭제 데이터 흐름 정리
-- 미착수: 마이페이지, 로그인 페이지, 인증 연결, 이미지 업로드, 글 수정 페이지
+- 마지막 작업일: 2026-05-04
+- 완료된 챕터: Ch7 (아키텍처·UI), Ch8 (Supabase 연결·배포)
+- 완료된 작업: 홈·포스트 목록·상세·작성·로그인·마이페이지·회원가입 7개 페이지, Supabase DB 마이그레이션, Vercel 배포
+- 진행 중: 없음 (Ch9 대기)
+- 미착수: 실제 Supabase Auth 연결, 실제 DB CRUD, 이미지 업로드, 글 수정·삭제 데이터 흐름
 
 ## 기술 결정 사항
 
@@ -13,9 +14,12 @@
 - React: 19.2.4
 - 스타일링: Tailwind CSS 4
 - UI 컴포넌트: shadcn/ui (`components/ui/` 사용)
-- 데이터: 현재는 `lib/posts.ts`의 인메모리 데이터 사용
-- 인증: Supabase Auth 예정이나 현재 코드에는 미연결
-- 이미지: Supabase Storage 사용 예정이나 현재 코드에는 미연결
+- 데이터: 현재 `lib/posts.ts` 인메모리 데이터 사용 (Ch9~부터 Supabase로 교체 예정)
+- Supabase: 프로젝트 `qxgutxeaolqbkjsfymiu` 연결 완료, `profiles`·`posts` 테이블 마이그레이션 완료
+- Supabase 클라이언트: `@supabase/ssr`의 `createBrowserClient` 패턴 사용 (`lib/supabase/client.ts`)
+- 인증: Supabase Auth 예정 (코드 미연결)
+- 이미지: Supabase Storage 예정 (코드 미연결)
+- 배포: Vercel (dkstpwjd2-2207s-projects/my-first-web), Supabase 환경변수 Production 등록 완료
 - 작업 관리: 작업 시작 전 `context.md`와 `todo.md`를 참고하고, 작업 중/종료 시 두 파일을 현재 상태로 갱신
 
 ## 해결된 이슈
@@ -88,9 +92,25 @@
 - `git add` → `git commit 0f95389` → `git push origin master` 완료.
 - 커밋 메시지: "Ch7: Add ARCHITECTURE.md, wireframe, signup page, login-signup link"
 
-## 2026-05-04 Ch8 Supabase 연결 완료
+## 2026-05-04 Ch8 Supabase 연결 + Vercel 배포 완료
 
-- Supabase 프로젝트 생성, `.env.local`에 API 키 및 URL 설정 완료.
+- Supabase 프로젝트 생성, `.env.local`에 `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_ANON_KEY` 설정 완료.
 - `profiles`, `posts` 테이블 스키마 작성 및 `supabase db push` 마이그레이션 완료.
-- `@supabase/ssr`, `@supabase/supabase-js` 설치 및 `lib/supabase/client.ts`에 클라이언트 설정 완료.
-- `npm run build`를 통해 빌드 통과 확인함.
+- `@supabase/ssr`, `@supabase/supabase-js` 설치 및 `lib/supabase/client.ts`에 `createBrowserClient` 패턴 구현.
+- `npm run build` 통과 (TypeScript 오류 없음, 9개 페이지 정적 생성).
+- Vercel 환경변수 (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) Production 등록 완료.
+- `git push origin master` → Vercel 자동 배포 완료 (status: Ready, commit 04dedcc).
+- `.env.local`이 `vercel link` 실수로 덮어써진 것을 Supabase 대시보드에서 키를 다시 받아 복구함.
+
+## AI 모델 공통 작업 지침 (Claude Code · Codex · Antigravity · Copilot 등)
+
+새 세션 시작 시 반드시 아래 두 파일을 먼저 읽을 것:
+
+```
+#file:context.md #file:ARCHITECTURE.md
+```
+
+현재 프로젝트 상태 요약 (세션 시작 시 AI에게 전달할 한 줄):
+> Ch8 완료: Supabase 프로젝트 연결·마이그레이션·Vercel 배포까지 모두 완료.
+> 다음은 Ch9 — 실제 Supabase DB에서 데이터를 읽어 포스트 목록·상세를 교체하는 작업.
+> `@supabase/ssr`의 `createBrowserClient` 패턴으로 작업할 것.

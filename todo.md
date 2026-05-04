@@ -43,7 +43,7 @@
 - [ ] PowerShell에서는 `npm` 대신 `npm.cmd` 사용 필요
 - [x] 빌드 실패: `next/font/google`이 네트워크 제한 환경에서 Geist 폰트를 가져오지 못함
 
-## 진행률: 13/28 (46%)
+## 진행률: 15/28 (54%)
 
 ## 2026-04-27 Check Log
 
@@ -86,9 +86,13 @@
 - [x] Updated `context.md` with Ch7 session summary.
 - [x] Updated `todo.md` progress (13/28, 46%).
 
-## 2026-05-04 Ch8 Supabase Log
+## 2026-05-04 Ch8 Supabase + Vercel 배포 로그
 
-- [x] Verified `.env.local` has `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-- [x] Verified `supabase/migrations/` contains schema for `profiles` and `posts`.
-- [x] Verified `lib/supabase/client.ts` is implemented using `@supabase/ssr`.
-- [x] `npm run build` passed successfully.
+- [x] `.env.local`에 `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_ANON_KEY` 확인.
+- [x] `supabase/migrations/`에 `profiles`·`posts` 스키마 확인.
+- [x] `lib/supabase/client.ts` — `@supabase/ssr` `createBrowserClient` 패턴 확인.
+- [x] `npm run build` 통과 (9개 페이지, TypeScript 오류 없음).
+- [x] Vercel 환경변수 (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) Production 등록.
+- [x] `git push origin master` → Vercel 자동 배포 완료 (status: Ready, commit 04dedcc).
+- [x] 흔한 AI 실수 5가지 체크리스트 전항목 통과 확인.
+- [x] `context.md` · `todo.md` Ch8 완료 및 AI 모델 공통 지침 등록.
