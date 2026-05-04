@@ -9,8 +9,8 @@
 - [x] 헤더/푸터 레이아웃
 - [x] 홈 페이지
 - [x] 포스트 기본 데이터 파일 작성 (`lib/posts.ts`)
-- [ ] Supabase 프로젝트 생성
-- [ ] 데이터베이스 스키마 작성
+- [x] Supabase 프로젝트 생성
+- [x] 데이터베이스 스키마 작성
 - [ ] 깨진 한글 문구 복구
 
 ## 2단계: 핵심 기능 (Ch9~10)
@@ -25,7 +25,7 @@
 - [ ] 포스트 삭제 동작 통일
 - [ ] 포스트 수정 기능
 - [ ] 로그인/회원가입 실제 인증 연결
-- [ ] `npm.cmd run build` 통과
+- [x] `npm.cmd run build` 통과
 
 ## 3단계: 고급 기능 (Ch11~12)
 
@@ -41,7 +41,7 @@
 - [x] `app/posts/posts-client.tsx` 및 search-bar import 오류 → 파일 자체가 삭제되어 실제 오류 없음 (확인 완료)
 - [ ] 포스트 목록은 외부 API를 우선 사용하고, 상세 페이지는 `lib/posts.ts` 데이터를 사용해서 데이터 소스가 다름
 - [ ] PowerShell에서는 `npm` 대신 `npm.cmd` 사용 필요
-- [ ] 빌드 실패: `next/font/google`이 네트워크 제한 환경에서 Geist 폰트를 가져오지 못함
+- [x] 빌드 실패: `next/font/google`이 네트워크 제한 환경에서 Geist 폰트를 가져오지 못함
 
 ## 진행률: 13/28 (46%)
 
@@ -86,3 +86,9 @@
 - [x] Updated `context.md` with Ch7 session summary.
 - [x] Updated `todo.md` progress (13/28, 46%).
 
+## 2026-05-04 Ch8 Supabase Log
+
+- [x] Verified `.env.local` has `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- [x] Verified `supabase/migrations/` contains schema for `profiles` and `posts`.
+- [x] Verified `lib/supabase/client.ts` is implemented using `@supabase/ssr`.
+- [x] `npm run build` passed successfully.

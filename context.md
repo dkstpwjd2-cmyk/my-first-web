@@ -87,3 +87,10 @@
 - `todo.md`의 search-bar 이슈를 `[x]` 완료 처리 — 해당 파일이 이미 삭제되어 실제 오류 없음 확인.
 - `git add` → `git commit 0f95389` → `git push origin master` 완료.
 - 커밋 메시지: "Ch7: Add ARCHITECTURE.md, wireframe, signup page, login-signup link"
+
+## 2026-05-04 Ch8 Supabase 연결 완료
+
+- Supabase 프로젝트 생성, `.env.local`에 API 키 및 URL 설정 완료.
+- `profiles`, `posts` 테이블 스키마 작성 및 `supabase db push` 마이그레이션 완료.
+- `@supabase/ssr`, `@supabase/supabase-js` 설치 및 `lib/supabase/client.ts`에 클라이언트 설정 완료.
+- `npm run build`를 통해 빌드 통과 확인함.
