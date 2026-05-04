@@ -79,3 +79,11 @@
 - 현재 완료 페이지: `/`(홈), `/posts`(목록), `/posts/[id]`(상세), `/posts/new`(작성), `/login`(로그인), `/mypage`(마이페이지), `/signup`(회원가입) 총 7개.
 - 데이터: 여전히 `lib/posts.ts` 인메모리 데이터 사용 (Supabase 연결은 Ch8 예정).
 - 남은 이슈: `app/posts/posts-client.tsx`의 `search-bar` import 오류, 빌드 실패(폰트 네트워크) 미해결.
+
+## 2026-04-29 Ch7 최종 저장 및 업로드
+
+- `app/login/page.tsx`에 회원가입(CardFooter + Link→/signup) 추가 — 로그인↔회원가입 양방향 연결.
+- `ARCHITECTURE.md` § 3에 AI 와이어프레임 섹션 삽입 (홈 + 포스트 작성 ASCII 다이어그램), 섹션 번호 재정렬(3→8).
+- `todo.md`의 search-bar 이슈를 `[x]` 완료 처리 — 해당 파일이 이미 삭제되어 실제 오류 없음 확인.
+- `git add` → `git commit 0f95389` → `git push origin master` 완료.
+- 커밋 메시지: "Ch7: Add ARCHITECTURE.md, wireframe, signup page, login-signup link"
