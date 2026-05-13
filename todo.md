@@ -65,3 +65,15 @@
 - [ ] Ch10: 검색 기능
 - [ ] Ch11: RLS 정책 적용
 - [ ] Ch12: 이미지 업로드와 Supabase Storage 연결
+
+## 2026-05-13 실습 글 복구
+
+- [x] Ch5/Ch7에서 만든 기본 포스트 3개 복구
+- [x] Supabase DB 글 목록과 실습 글 목록이 함께 보이도록 유지
+- [x] `/posts/1`, `/posts/2`, `/posts/3` 상세 페이지 복구
+- [x] 실습 글 삭제 버튼 숨김
+- [x] `/posts/999` 같은 UUID가 아닌 상세 URL에서 500 대신 없는 글 화면 표시
+- [x] `docs/ch01a.md` ~ `docs/ch09a.md` 변경 없음 확인
+- [x] `npm.cmd run lint` 통과
+- [x] `npm.cmd run build` 통과
+- [x] `/posts`, `/posts/1`, `/posts/999`, 비로그인 `/posts/new`, `/mypage` 응답 확인

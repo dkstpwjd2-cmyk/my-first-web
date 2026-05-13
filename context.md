@@ -74,4 +74,18 @@
   - `npm.cmd run lint`: passed
   - `npm.cmd run build`: passed
   - `/`, `/posts`, `/login`: 200
-  - 비로그인 `/posts/new`: 307 -> `/login`
+
+## 2026-05-13 Practice post restoration
+
+- Restored the three Ch5/Ch7 practice posts in `lib/posts.ts` as read-only posts while keeping Supabase-backed posts for Ch8/Ch9.
+- Practice posts now appear on `/posts` and `/posts/1`, `/posts/2`, `/posts/3` without requiring rows in the Supabase `posts` table.
+- Practice posts hide the delete button so the fixed lesson content is not treated like user-created DB content.
+- Added a UUID guard before Supabase detail/delete queries so lesson routes such as `/posts/999` render the not-found UI instead of a 500.
+- Confirmed `docs/ch01a.md` through `docs/ch09a.md` still have no changes.
+- Verification after restoration:
+  - `npm.cmd run lint`: passed
+  - `npm.cmd run build`: passed
+  - `/posts`: 200 and contains all three practice post titles
+  - `/posts/1`: 200, contains the original first post content, and has no delete button
+  - `/posts/999`: 200 with the not-found message
+  - Non-login `/posts/new`, `/mypage`: 307 -> `/login`

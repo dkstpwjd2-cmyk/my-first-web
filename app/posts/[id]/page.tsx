@@ -85,34 +85,36 @@ export default async function PostDetailPage({
           <Link href="/posts">목록으로 돌아가기</Link>
         </Button>
 
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button type="button" variant="destructive">
-              삭제
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>포스트를 삭제할까요?</DialogTitle>
-              <DialogDescription>
-                삭제하면 목록에서 바로 사라집니다. 이 작업은 되돌릴 수 없습니다.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button type="button" variant="outline">
-                  취소
-                </Button>
-              </DialogClose>
-              <form action={deletePostAction}>
-                <input type="hidden" name="id" value={post.id} />
-                <Button type="submit" variant="destructive">
-                  삭제하기
-                </Button>
-              </form>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {!post.isPractice && (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button type="button" variant="destructive">
+                삭제
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>포스트를 삭제할까요?</DialogTitle>
+                <DialogDescription>
+                  삭제하면 목록에서 바로 사라집니다. 이 작업은 되돌릴 수 없습니다.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button type="button" variant="outline">
+                    취소
+                  </Button>
+                </DialogClose>
+                <form action={deletePostAction}>
+                  <input type="hidden" name="id" value={post.id} />
+                  <Button type="submit" variant="destructive">
+                    삭제하기
+                  </Button>
+                </form>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </CardFooter>
     </Card>
   );
