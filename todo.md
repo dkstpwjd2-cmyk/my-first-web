@@ -113,3 +113,17 @@
 - [x] `git push origin master` → Vercel 자동 배포 완료 (status: Ready, commit 04dedcc).
 - [x] 흔한 AI 실수 5가지 체크리스트 전항목 통과 확인.
 - [x] `context.md` · `todo.md` Ch8 완료 및 AI 모델 공통 지침 등록.
+
+## 2026-05-13 Ch9 정밀점검 로그
+
+- [x] `lib/auth.ts` — `signInWithPassword`, `signUp`, `signOut` 3개 함수 확인
+- [x] `contexts/AuthContext.tsx` — `getUser()`, `onAuthStateChange()`, `unsubscribe()` 확인
+- [x] `app/login/page.tsx` — `"use client"`, `next/navigation`, `useAuth()` 사용 확인
+- [x] `app/signup/page.tsx` — 이름/이메일/비밀번호/비밀번호확인, 성공 메시지 확인
+- [x] `app/layout.tsx` — `AuthProvider` 감싸기 확인
+- [x] `components/Navigation.tsx` — 비로그인/로그인 상태 분기 확인
+- [x] `proxy.ts` — 루트 위치, `/posts/new`·`/mypage` 보호, `createServerClient` 사용 확인
+- [x] 보안 grep: `auth.signIn()` 없음, `service_role`/`sb_secret_`/`sbp_` 없음, `next/router` 없음
+- [x] UI 스크린샷: 회원가입, 로그인, 홈(비로그인 Header), 보호 라우트 리다이렉트 확인
+- [x] 흔한 AI 실수 7항목 전부 통과
+- [ ] `npm run build` — Google Fonts 네트워크 차단으로 실패 (Auth 코드와 무관, Vercel 배포는 정상)
