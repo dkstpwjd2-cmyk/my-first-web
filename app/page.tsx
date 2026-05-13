@@ -8,76 +8,84 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getPosts } from "@/lib/posts";
 
-const routes = [
-  {
-    href: "/posts",
-    title: "포스트 목록",
-    description: "전체 포스트를 카드 형태로 확인합니다.",
-  },
-  {
-    href: "/posts/new",
-    title: "포스트 작성",
-    description: "새 포스트를 작성하고 목록으로 이동합니다.",
-  },
-  {
-    href: "/login",
-    title: "로그인",
-    description: "사용자 로그인을 위한 기본 화면입니다.",
-  },
-  {
-    href: "/mypage",
-    title: "마이페이지",
-    description: "내 정보와 활동 요약을 보여주는 화면입니다.",
-  },
-];
+export default async function Home() {
+  const posts = await getPosts();
+  const latestPosts = posts.slice(0, 2);
 
-export default function Home() {
   return (
-    <div className="space-y-6">
-      <section className="space-y-3">
-        <p className="text-sm font-medium text-[var(--primary)]">홈 (/)</p>
-        <h1 className="text-3xl font-bold tracking-normal">웹페이지 구조</h1>
-        <p className="max-w-2xl text-sm leading-6 text-[var(--muted-foreground)]">
-          요청한 App Router 구조에 맞춰 홈, 포스트 목록, 포스트 상세, 포스트
-          작성, 로그인, 마이페이지 라우트를 구성했습니다.
+    <div className="space-y-8">
+      <section className="space-y-4 border-b border-border pb-8">
+        <p className="text-sm font-medium text-primary">개인 블로그</p>
+        <h1 className="max-w-2xl text-4xl font-bold leading-tight tracking-normal">
+          배운 것과 일상을 차분하게 기록합니다.
+        </h1>
+        <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+          My First Web은 수업에서 배운 웹 기술과 일상의 생각을 정리하는
+          블로그입니다. 읽기 좋은 글과 꾸준한 기록에 집중합니다.
         </p>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Link href="/posts" className={buttonVariants()}>
+            포스트 보러가기
+          </Link>
+          <Link href="/posts/new" className={buttonVariants({ variant: "outline" })}>
+            새 글 작성
+          </Link>
+        </div>
       </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>라우트 트리</CardTitle>
-          <CardDescription>현재 웹페이지의 주요 경로입니다.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <pre className="overflow-x-auto rounded-lg bg-[var(--muted)] p-4 text-sm leading-7 text-[var(--foreground)]">
-{`홈 (/)
-├── 포스트 목록 (/posts)
-│   ├── 포스트 상세 (/posts/[id])
-│   └── 포스트 작성 (/posts/new)
-├── 로그인 (/login)
-└── 마이페이지 (/mypage)`}
-          </pre>
-        </CardContent>
-      </Card>
+      <section className="space-y-4">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold tracking-normal">최근 포스트</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              최근에 작성된 글을 먼저 보여줍니다.
+            </p>
+          </div>
+          <Link
+            href="/posts"
+            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+          >
+            전체 보기
+          </Link>
+        </div>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {routes.map((route) => (
-          <Card key={route.href}>
+        {latestPosts.length === 0 ? (
+          <Card className="rounded-lg shadow-sm">
             <CardHeader>
-              <CardTitle>{route.title}</CardTitle>
-              <CardDescription>{route.description}</CardDescription>
+              <CardTitle>아직 포스트가 없습니다</CardTitle>
+              <CardDescription>
+                로그인 후 첫 번째 글을 작성해 보세요.
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <Link
-                href={route.href}
-                className={buttonVariants({ variant: "outline" })}
-              >
-                이동하기
-              </Link>
-            </CardContent>
           </Card>
-        ))}
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {latestPosts.map((post) => (
+              <Card key={post.id} className="rounded-lg shadow-sm">
+                <CardHeader>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="rounded-lg bg-accent px-2 py-1 text-accent-foreground">
+                      {post.category}
+                    </span>
+                    <span>{post.date || "기록"}</span>
+                  </div>
+                  <CardTitle>{post.title}</CardTitle>
+                  <CardDescription>{post.excerpt}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Link
+                    href={`/posts/${post.id}`}
+                    className={buttonVariants({ variant: "outline" })}
+                  >
+                    상세 보기
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

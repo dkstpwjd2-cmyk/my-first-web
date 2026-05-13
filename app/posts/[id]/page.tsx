@@ -26,10 +26,10 @@ import { deletePostById, getPostById } from "@/lib/posts";
 async function deletePostAction(formData: FormData) {
   "use server";
 
-  const id = Number(formData.get("id"));
+  const id = String(formData.get("id") ?? "");
 
-  if (Number.isFinite(id)) {
-    deletePostById(id);
+  if (id) {
+    await deletePostById(id);
     revalidatePath("/posts");
     revalidatePath(`/posts/${id}`);
   }
@@ -43,8 +43,7 @@ export default async function PostDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const numericId = Number(id);
-  const post = getPostById(numericId);
+  const post = await getPostById(id);
 
   if (!post) {
     return (
@@ -71,10 +70,10 @@ export default async function PostDetailPage({
           <span className="rounded-lg bg-accent px-2 py-1 text-accent-foreground">
             {post.category}
           </span>
-          <span>{post.date}</span>
+          <span>{post.date || "기록"}</span>
         </div>
         <CardTitle className="text-3xl">{post.title}</CardTitle>
-        <CardDescription>작성자 {post.author}</CardDescription>
+        <CardDescription>작성자: {post.author}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="whitespace-pre-line leading-7 text-foreground">
@@ -106,7 +105,7 @@ export default async function PostDetailPage({
                 </Button>
               </DialogClose>
               <form action={deletePostAction}>
-                <input type="hidden" name="id" value={String(post.id)} />
+                <input type="hidden" name="id" value={post.id} />
                 <Button type="submit" variant="destructive">
                   삭제하기
                 </Button>

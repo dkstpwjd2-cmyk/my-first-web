@@ -1,129 +1,67 @@
 # TODO - my-first-web
 
-## 1단계: 기본 구조 (Ch7~8)
+## 완료
 
-- [x] AGENTS.md / CODEX.md 프로젝트 작업 지침 작성
-- [x] 작업 시작/진행/종료 시 `context.md`와 `todo.md`를 관리하는 규칙 추가
-- [x] shadcn/ui 기본 컴포넌트 준비 (`Button`, `Card`, `Input`, `Textarea`)
-- [x] Tailwind CSS 4 전역 스타일 및 디자인 토큰 설정
-- [x] 헤더/푸터 레이아웃
-- [x] 홈 페이지
-- [x] 포스트 기본 데이터 파일 작성 (`lib/posts.ts`)
-- [x] Supabase 프로젝트 생성
-- [x] 데이터베이스 스키마 작성
-- [ ] 깨진 한글 문구 복구
+- [x] Next.js App Router 기본 페이지 구성
+- [x] shadcn/ui 기본 컴포넌트 적용
+- [x] Tailwind CSS 4 디자인 토큰 적용
+- [x] Supabase 프로젝트 연결 및 환경변수 설정
+- [x] Supabase `profiles`, `posts` 테이블 마이그레이션 작성
+- [x] Supabase Auth 이메일/비밀번호 로그인 구현
+- [x] `AuthProvider`와 `useAuth` 구현
+- [x] 로그인/회원가입/로그아웃 UI 연결
+- [x] `proxy.ts`로 `/posts/new`, `/mypage` 보호
+- [x] 주요 화면 한글 깨짐 복구
+- [x] `next/font/google` 제거로 로컬 빌드 실패 해결
+- [x] 게시글 목록/상세/작성/삭제를 Supabase DB로 연결
+- [x] `npm.cmd run lint` 통과
+- [x] `npm.cmd run build` 통과
+- [x] 로컬 응답 확인: `/`, `/login`, `/signup`, `/posts`
+- [x] 보호 라우트 리다이렉트 확인: `/posts/new`, `/mypage`
 
-## 2단계: 핵심 기능 (Ch9~10)
+## 남은 필수 확인
 
-- [x] 포스트 목록 페이지 기본 구조
-- [x] 포스트 상세 페이지 UI
-- [x] 새 포스트 작성 화면 기본 폼
-- [x] 회원가입 페이지 (`/signup`)
-- [ ] 포스트 목록 검색 컴포넌트 연결
-- [ ] 포스트 상세 페이지 데이터 연결 정리
-- [ ] 포스트 작성 실제 저장 처리
-- [ ] 포스트 삭제 동작 통일
-- [ ] 포스트 수정 기능
+- [ ] Supabase 대시보드 Email Provider 설정 확인
+- [ ] Supabase URL Configuration에 로컬/배포 URL 확인
+- [ ] 브라우저에서 실제 회원가입 테스트
+- [ ] 브라우저에서 실제 로그인 테스트
+- [ ] 로그인 상태에서 `/posts/new` 글 작성 테스트
+- [ ] 작성한 글의 상세 페이지 확인
+- [ ] 로그아웃 후 보호 라우트 접근 차단 확인
+- [ ] Vercel 배포 후 같은 흐름 재검증
+
+## 2026-05-13 추가 수정
+
+- [x] 로그인 후 `router.push` 대신 전체 페이지 이동으로 Supabase 쿠키 동기화 보강
+- [x] 로그아웃 후 전체 페이지 이동으로 서버/클라이언트 인증 상태 동기화
+- [x] `npm.cmd run lint` 통과
 - [x] `npm.cmd run build` 통과
 
-### Ch9: Supabase Auth 구현 (이메일/비밀번호)
+## 2026-05-13 디자인 업그레이드
 
-- [x] `lib/supabase/client.ts` — `createBrowserClient` 확인 (Ch8에서 생성됨)
-- [x] `lib/supabase/server.ts` — `createServerClient` 작성
-- [x] `lib/auth.ts` — `signUp`, `signIn`, `signOut` 함수 작성
-  - `signIn`은 반드시 `signInWithPassword()` 사용 ✅
-- [x] `app/login/page.tsx` — 실제 Auth 연결 완료
-- [x] `app/signup/page.tsx` — 실제 Auth 연결 완료
-- [x] `components/Navigation.tsx` — 로그인 상태에 따라 글쓰기/로그아웃 ↔ 로그인/회원가입 전환
-- [x] `proxy.ts` (루트) — `/posts/new`, `/mypage` 미인증 접근 시 `/login` 리다이렉트
-  - ⚠️ Next.js 16.2.1: `middleware.ts` deprecated → `proxy.ts` + 함수명 `proxy`
-- [x] `contexts/AuthContext.tsx` — AuthProvider + useAuth Hook 작성
-- [x] `app/layout.tsx` — AuthProvider 연결 완료
-- [x] `npm run build` 통과 (Exit code: 0) ✅
-- [ ] Supabase 대시보드에서 이메일 인증 설정 확인 (2026년 5월 UI 기준) — **사람이 확인 필요**
-- [ ] 로컬 dev 서버에서 회원가입 → 로그인 → 보호 라우트 접근 흐름 검증 — **브라우저 테스트 필요**
-- [ ] Vercel 배포 후 동작 확인
+- [x] 홈 화면을 실제 블로그형 첫 화면으로 개편
+- [x] 포스트 목록 카드 디자인 고급화
+- [x] 포스트 상세 페이지를 읽기 좋은 문서형 레이아웃으로 개선
+- [x] 글쓰기 폼 디자인 정리
+- [x] 로그인/회원가입 화면 디자인 정리
+- [x] 마이페이지 디자인 정리
+- [x] 내비게이션/푸터/테마 토큰 정리
+- [x] 디자인 변경 후 `npm.cmd run lint` 통과
+- [x] 디자인 변경 후 `npm.cmd run build` 통과
+- [x] 주요 라우트와 보호 라우트 응답 확인
 
-## 3단계: 고급 기능 (Ch10~12)
+## 2026-05-13 디자인 방향 재조정
 
-- [ ] 마이페이지 실사용자 데이터 연결
-- [ ] 댓글 기능
-- [ ] 이미지 업로드
-- [ ] 카테고리 필터
-- [ ] Supabase Storage 연결
-- [ ] RLS 정책 적용 (Ch11)
+- [x] 과한 상용형/영어 라벨 방향을 철회
+- [x] 한국어 중심의 단정한 개인 블로그 톤으로 재정리
+- [x] `docs/ch01a.md` ~ `docs/ch09a.md` 변경 없음 확인
+- [x] `npm.cmd run lint` 통과
+- [x] `npm.cmd run build` 통과
+- [x] `/`, `/posts`, `/login`, 비로그인 `/posts/new` 응답 확인
 
-## 현재 확인된 이슈
+## 이후 챕터 작업
 
-- [x] `app/posts/posts-client.tsx` 및 search-bar import 오류 → 파일 자체가 삭제되어 실제 오류 없음 (확인 완료)
-- [ ] 포스트 목록은 외부 API를 우선 사용하고, 상세 페이지는 `lib/posts.ts` 데이터를 사용해서 데이터 소스가 다름
-- [ ] PowerShell에서는 `npm` 대신 `npm.cmd` 사용 필요
-- [x] 빌드 실패: `next/font/google`이 네트워크 제한 환경에서 Geist 폰트를 가져오지 못함
-
-## 진행률: 15/28 (54%)
-
-## 2026-04-27 Check Log
-
-- [x] shadcn/ui install verification: files, aliases, CSS tokens, lint, and TypeScript all passed.
-- [ ] Production build still needs a network-independent font setup or network access because `next/font/google` cannot fetch Geist in the current environment.
-
-## 2026-04-27 UI Application Log
-
-- [x] Applied shadcn/ui Card/Button/Input/Dialog to the blog pages while preserving the current route/data flow.
-- [x] Verified with `npm.cmd run lint`.
-- [x] Verified with `npx.cmd tsc --noEmit`.
-- [x] Confirmed `/posts`, `/posts/new`, and `/posts/1` return HTTP 200 on the running dev server.
-
-## 2026-04-27 Theme Log
-
-- [x] Refined shadcn/ui theme variables in `app/globals.css` for a bright, clean personal blog.
-- [x] Kept the existing CSS structure and changed only theme variable values.
-- [x] Verified with `npm.cmd run lint`.
-- [x] Verified with `npx.cmd tsc --noEmit`.
-- [x] Confirmed `/posts` returns HTTP 200 on the running dev server.
-
-## 2026-04-27 Instruction Log
-
-- [x] Added `Design Tokens` and `Component Rules` to `.github/copilot-instructions.md`.
-- [x] Applied the same design/component rules to `AGENTS.md`, `CODEX.md`, and `CLAUDE.md`.
-- [x] Confirmed the updated instruction files contain readable UTF-8 Korean text.
-
-## 2026-04-27 Save Log
-
-- [x] Prepared current project work for commit.
-- [x] Excluded local dev server logs with `.gitignore`.
-- [x] Commit current work.
-- [x] Push commit to `origin`.
-
-## 2026-04-29 Ch7 Architecture Log
-
-- [x] Created `ARCHITECTURE.md`: page map, 3 user flows, component hierarchy, DB schema (profiles + posts).
-- [x] Created `app/signup/page.tsx` with shadcn/ui Card + Input + Button.
-- [x] Generated 2 AI wireframes (home card grid + post creation form).
-- [x] Updated `context.md` with Ch7 session summary.
-- [x] Updated `todo.md` progress (13/28, 46%).
-
-## 2026-05-04 Ch8 Supabase + Vercel 배포 로그
-
-- [x] `.env.local`에 `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_ANON_KEY` 확인.
-- [x] `supabase/migrations/`에 `profiles`·`posts` 스키마 확인.
-- [x] `lib/supabase/client.ts` — `@supabase/ssr` `createBrowserClient` 패턴 확인.
-- [x] `npm run build` 통과 (9개 페이지, TypeScript 오류 없음).
-- [x] Vercel 환경변수 (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) Production 등록.
-- [x] `git push origin master` → Vercel 자동 배포 완료 (status: Ready, commit 04dedcc).
-- [x] 흔한 AI 실수 5가지 체크리스트 전항목 통과 확인.
-- [x] `context.md` · `todo.md` Ch8 완료 및 AI 모델 공통 지침 등록.
-
-## 2026-05-13 Ch9 정밀점검 로그
-
-- [x] `lib/auth.ts` — `signInWithPassword`, `signUp`, `signOut` 3개 함수 확인
-- [x] `contexts/AuthContext.tsx` — `getUser()`, `onAuthStateChange()`, `unsubscribe()` 확인
-- [x] `app/login/page.tsx` — `"use client"`, `next/navigation`, `useAuth()` 사용 확인
-- [x] `app/signup/page.tsx` — 이름/이메일/비밀번호/비밀번호확인, 성공 메시지 확인
-- [x] `app/layout.tsx` — `AuthProvider` 감싸기 확인
-- [x] `components/Navigation.tsx` — 비로그인/로그인 상태 분기 확인
-- [x] `proxy.ts` — 루트 위치, `/posts/new`·`/mypage` 보호, `createServerClient` 사용 확인
-- [x] 보안 grep: `auth.signIn()` 없음, `service_role`/`sb_secret_`/`sbp_` 없음, `next/router` 없음
-- [x] UI 스크린샷: 회원가입, 로그인, 홈(비로그인 Header), 보호 라우트 리다이렉트 확인
-- [x] 흔한 AI 실수 7항목 전부 통과
-- [ ] `npm run build` — Google Fonts 네트워크 차단으로 실패 (Auth 코드와 무관, Vercel 배포는 정상)
+- [ ] Ch10: 글 수정 기능
+- [ ] Ch10: 검색 기능
+- [ ] Ch11: RLS 정책 적용
+- [ ] Ch12: 이미지 업로드와 Supabase Storage 연결

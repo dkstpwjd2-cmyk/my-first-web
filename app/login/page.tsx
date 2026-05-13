@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -17,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
-  const router = useRouter();
   const { signInWithEmail } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -38,15 +36,15 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/posts");
+    window.location.assign("/posts");
   }
 
   return (
-    <Card className="mx-auto max-w-sm">
+    <Card className="mx-auto max-w-sm rounded-lg shadow-sm">
       <CardHeader>
         <CardTitle>로그인</CardTitle>
         <CardDescription>
-          이메일과 비밀번호를 입력하세요.
+          이메일과 비밀번호를 입력해 블로그에 로그인하세요.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -90,7 +88,10 @@ export default function LoginPage() {
       </CardContent>
       <CardFooter className="justify-center text-sm text-muted-foreground">
         계정이 없으신가요?&nbsp;
-        <Link href="/signup" className="text-primary underline-offset-4 hover:underline">
+        <Link
+          href="/signup"
+          className="text-primary underline-offset-4 hover:underline"
+        >
           회원가입
         </Link>
       </CardFooter>

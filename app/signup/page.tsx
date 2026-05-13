@@ -47,13 +47,14 @@ export default function SignupPage() {
       return;
     }
 
-    // Supabase 이메일 확인이 켜져 있으면 메일 안내, 꺼져 있으면 바로 로그인 페이지로
-    setSuccessMsg("가입 완료! 확인 이메일을 받으셨다면 인증 후 로그인하세요.");
+    setSuccessMsg(
+      "가입이 완료되었습니다. 확인 이메일을 받았다면 인증 후 로그인하세요."
+    );
     setTimeout(() => router.push("/login"), 2500);
   }
 
   return (
-    <Card className="mx-auto max-w-sm">
+    <Card className="mx-auto max-w-sm rounded-lg shadow-sm">
       <CardHeader>
         <CardTitle>회원가입</CardTitle>
         <CardDescription>
@@ -68,7 +69,7 @@ export default function SignupPage() {
             </p>
           )}
           {successMsg && (
-            <p className="rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">
+            <p className="rounded-md bg-accent px-3 py-2 text-sm text-accent-foreground">
               {successMsg}
             </p>
           )}
@@ -134,7 +135,10 @@ export default function SignupPage() {
       </CardContent>
       <CardFooter className="justify-center text-sm text-muted-foreground">
         이미 계정이 있으신가요?&nbsp;
-        <Link href="/login" className="text-primary underline-offset-4 hover:underline">
+        <Link
+          href="/login"
+          className="text-primary underline-offset-4 hover:underline"
+        >
           로그인
         </Link>
       </CardFooter>

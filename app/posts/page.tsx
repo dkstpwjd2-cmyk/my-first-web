@@ -12,7 +12,7 @@ import {
 import { getPosts } from "@/lib/posts";
 
 export default async function PostsPage() {
-  const posts = getPosts();
+  const posts = await getPosts();
 
   return (
     <div className="space-y-6">
@@ -20,7 +20,7 @@ export default async function PostsPage() {
         <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-normal">포스트 목록</h1>
           <p className="text-sm text-muted-foreground">
-            작성한 포스트를 확인하고 상세 페이지로 이동할 수 있습니다.
+            작성된 포스트를 확인하고 상세 페이지로 이동할 수 있습니다.
           </p>
         </div>
         <Button asChild>
@@ -28,32 +28,43 @@ export default async function PostsPage() {
         </Button>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {posts.map((post) => (
-          <Card key={post.id} className="rounded-lg shadow-sm">
-            <CardHeader>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="rounded-lg bg-accent px-2 py-1 text-accent-foreground">
-                  {post.category}
-                </span>
-                <span>{post.date}</span>
-              </div>
-              <CardTitle>{post.title}</CardTitle>
-              <CardDescription>{post.excerpt}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                작성자 {post.author}
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Button asChild variant="outline">
-                <Link href={`/posts/${post.id}`}>상세 보기</Link>
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </section>
+      {posts.length === 0 ? (
+        <Card className="rounded-lg shadow-sm">
+          <CardHeader>
+            <CardTitle>아직 포스트가 없습니다</CardTitle>
+            <CardDescription>
+              로그인 후 첫 번째 포스트를 작성해 보세요.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      ) : (
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {posts.map((post) => (
+            <Card key={post.id} className="rounded-lg shadow-sm">
+              <CardHeader>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span className="rounded-lg bg-accent px-2 py-1 text-accent-foreground">
+                    {post.category}
+                  </span>
+                  <span>{post.date || "기록"}</span>
+                </div>
+                <CardTitle>{post.title}</CardTitle>
+                <CardDescription>{post.excerpt}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  작성자: {post.author}
+                </p>
+              </CardContent>
+              <CardFooter>
+                <Button asChild variant="outline">
+                  <Link href={`/posts/${post.id}`}>상세 보기</Link>
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </section>
+      )}
     </div>
   );
 }

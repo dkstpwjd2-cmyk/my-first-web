@@ -19,14 +19,14 @@ async function createPostAction(formData: FormData) {
 
   const title = String(formData.get("title") ?? "");
   const content = String(formData.get("content") ?? "");
-  const category = String(formData.get("category") ?? "일상");
 
   if (title.trim() && content.trim()) {
-    createPost({ title, content, category });
+    const post = await createPost({ title, content });
     revalidatePath("/posts");
+    redirect(`/posts/${post.id}`);
   }
 
-  redirect("/posts");
+  redirect("/posts/new");
 }
 
 export default function NewPostPage() {
@@ -35,7 +35,7 @@ export default function NewPostPage() {
       <CardHeader>
         <CardTitle>포스트 작성</CardTitle>
         <CardDescription>
-          제목과 내용을 입력하면 포스트 목록에 새 글이 추가됩니다.
+          제목과 내용을 입력하면 새 포스트가 저장됩니다.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -48,18 +48,6 @@ export default function NewPostPage() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="category" className="text-sm font-medium">
-              카테고리
-            </label>
-            <Input
-              id="category"
-              name="category"
-              defaultValue="일상"
-              placeholder="일상"
-            />
-          </div>
-
-          <div className="space-y-2">
             <label htmlFor="content" className="text-sm font-medium">
               내용
             </label>
@@ -67,6 +55,7 @@ export default function NewPostPage() {
               id="content"
               name="content"
               required
+              className="min-h-64"
               placeholder="내용을 입력하세요"
             />
           </div>

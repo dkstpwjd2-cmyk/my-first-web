@@ -1,32 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Navigation() {
-  const router = useRouter();
   const { user, loading, signOut } = useAuth();
 
   async function handleSignOut() {
     await signOut();
-    router.push("/");
+    window.location.assign("/");
   }
 
   return (
-    <header className="border-b border-[var(--border)] bg-[var(--card)]">
+    <header className="border-b border-border bg-card">
       <nav className="mx-auto flex max-w-4xl flex-wrap items-center gap-2 px-6 py-4">
-        {/* 로고 */}
         <Link
           href="/"
-          className="mr-auto text-base font-bold tracking-normal text-[var(--foreground)]"
+          className="mr-auto text-base font-bold tracking-normal text-foreground"
         >
           My First Web
         </Link>
 
-        {/* 공통 링크: 포스트 목록 */}
         <Link
           href="/posts"
           className={buttonVariants({ variant: "ghost", className: "h-9" })}
@@ -34,14 +30,10 @@ export default function Navigation() {
           포스트
         </Link>
 
-        {/* 로딩 중 */}
         {loading && (
-          <span className="h-9 px-3 text-sm text-[var(--muted-foreground)]">
-            ...
-          </span>
+          <span className="h-9 px-3 text-sm text-muted-foreground">...</span>
         )}
 
-        {/* 로그인 상태 */}
         {!loading && user && (
           <>
             <Link
@@ -67,7 +59,6 @@ export default function Navigation() {
           </>
         )}
 
-        {/* 비로그인 상태 */}
         {!loading && !user && (
           <>
             <Link

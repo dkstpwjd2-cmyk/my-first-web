@@ -18,7 +18,7 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             );
           } catch {
-            // Server Component에서는 쿠키 쓰기가 무시될 수 있음
+            // Server Components can ignore cookie writes.
           }
         },
       },
