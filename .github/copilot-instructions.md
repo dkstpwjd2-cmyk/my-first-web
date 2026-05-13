@@ -4,6 +4,15 @@
 - React 19.2.4
 - Tailwind CSS 4
 - shadcn/ui (components/ui/ 경로에 설치됨)
+- @supabase/supabase-js (교재 기준: 2.47.12 / 실제 설치: ^2.105.1)
+- @supabase/ssr (교재 기준: 0.5.2 / 실제 설치: ^0.10.2)
+
+## Version Policy
+
+- 교재 기준: Next.js 16.2.1, @supabase/supabase-js 2.47.12, @supabase/ssr 0.5.2
+- 실제 package.json이 더 최신일 수 있다.
+- 수업 프롬프트와 설명은 교재 기준으로 통일한다.
+- 빌드 오류가 버전 차이에서 발생하면 package.json 기준으로 원인을 확인한다.
 
 ## Coding Conventions
 
@@ -40,6 +49,16 @@
 - 클라이언트에서 `useEffect`로 데이터 요청 금지
 - 로딩 상태는 `app/` 안의 `loading.tsx` 파일로 처리
 
+## Supabase Auth Rules (Ch9)
+
+- 이메일/비밀번호 인증만 사용한다. 소셜 로그인은 추가하지 않는다.
+- 로그인은 `supabase.auth.signInWithPassword()` 사용. 구버전 `auth.signIn()` 사용 금지.
+- 환경변수 이름 고정: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `service_role` 키는 클라이언트 코드에 절대 두지 않는다.
+- 보호 라우트는 `middleware.ts`로 처리한다 (`pages/` 라우터 미들웨어 금지).
+- Supabase 클라이언트: `@supabase/ssr`의 `createBrowserClient` (클라이언트) / `createServerClient` (서버) 패턴 사용.
+- Supabase 대시보드 메뉴 안내는 2026년 5월 기준이다.
+
 ## Known AI Mistakes
 
 - Do not use `next/router`; use `next/navigation` when navigation is needed.
@@ -48,3 +67,5 @@
 - Do not use `<img>`; use `next/image` (`Image` component) instead.
 - Do not use `<a>`; use `next/link` (`Link` component) instead.
 - Do not fetch data with `useEffect`; fetch in Server Components instead.
+- Do not use `supabase.auth.signIn()` (deprecated); use `supabase.auth.signInWithPassword()` instead.
+- Do not expose `service_role` key in any client-side code or public env variables.

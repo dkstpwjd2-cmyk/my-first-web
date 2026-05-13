@@ -24,17 +24,34 @@
 - [ ] 포스트 작성 실제 저장 처리
 - [ ] 포스트 삭제 동작 통일
 - [ ] 포스트 수정 기능
-- [ ] 로그인/회원가입 실제 인증 연결
 - [x] `npm.cmd run build` 통과
 
-## 3단계: 고급 기능 (Ch11~12)
+### Ch9: Supabase Auth 구현 (이메일/비밀번호)
+
+- [x] `lib/supabase/client.ts` — `createBrowserClient` 확인 (Ch8에서 생성됨)
+- [x] `lib/supabase/server.ts` — `createServerClient` 작성
+- [x] `lib/auth.ts` — `signUp`, `signIn`, `signOut` 함수 작성
+  - `signIn`은 반드시 `signInWithPassword()` 사용 ✅
+- [x] `app/login/page.tsx` — 실제 Auth 연결 완료
+- [x] `app/signup/page.tsx` — 실제 Auth 연결 완료
+- [x] `components/Navigation.tsx` — 로그인 상태에 따라 글쓰기/로그아웃 ↔ 로그인/회원가입 전환
+- [x] `proxy.ts` (루트) — `/posts/new`, `/mypage` 미인증 접근 시 `/login` 리다이렉트
+  - ⚠️ Next.js 16.2.1: `middleware.ts` deprecated → `proxy.ts` + 함수명 `proxy`
+- [x] `contexts/AuthContext.tsx` — AuthProvider + useAuth Hook 작성
+- [x] `app/layout.tsx` — AuthProvider 연결 완료
+- [x] `npm run build` 통과 (Exit code: 0) ✅
+- [ ] Supabase 대시보드에서 이메일 인증 설정 확인 (2026년 5월 UI 기준) — **사람이 확인 필요**
+- [ ] 로컬 dev 서버에서 회원가입 → 로그인 → 보호 라우트 접근 흐름 검증 — **브라우저 테스트 필요**
+- [ ] Vercel 배포 후 동작 확인
+
+## 3단계: 고급 기능 (Ch10~12)
 
 - [ ] 마이페이지 실사용자 데이터 연결
 - [ ] 댓글 기능
 - [ ] 이미지 업로드
 - [ ] 카테고리 필터
-- [ ] Supabase Auth 연결
 - [ ] Supabase Storage 연결
+- [ ] RLS 정책 적용 (Ch11)
 
 ## 현재 확인된 이슈
 

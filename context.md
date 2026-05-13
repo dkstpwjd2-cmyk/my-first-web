@@ -2,11 +2,11 @@
 
 ## 현재 상태
 
-- 마지막 작업일: 2026-05-04
-- 완료된 챕터: Ch7 (아키텍처·UI), Ch8 (Supabase 연결·배포)
-- 완료된 작업: 홈·포스트 목록·상세·작성·로그인·마이페이지·회원가입 7개 페이지, Supabase DB 마이그레이션, Vercel 배포
-- 진행 중: 없음 (Ch9 대기)
-- 미착수: 실제 Supabase Auth 연결, 실제 DB CRUD, 이미지 업로드, 글 수정·삭제 데이터 흐름
+- 마지막 작업일: 2026-05-13
+- 완료된 챕터: Ch7 (아키텍처·UI), Ch8 (Supabase 연결·배포), **Ch9 (Supabase Auth)**
+- 완료된 작업: 홈·포스트 목록·상세·작성·로그인·마이페이지·회원가입 7개 페이지, Supabase DB 마이그레이션, Vercel 배포, **이메일/비밀번호 Auth + middleware(proxy) 보호 라우트**
+- 진행 중: 없음 (Ch10 대기)
+- 미착수: 실제 DB CRUD 연결, 이미지 업로드, 글 수정·삭제 데이터 흐름, RLS 정책
 
 ## 기술 결정 사항
 
@@ -17,7 +17,13 @@
 - 데이터: 현재 `lib/posts.ts` 인메모리 데이터 사용 (Ch9~부터 Supabase로 교체 예정)
 - Supabase: 프로젝트 `qxgutxeaolqbkjsfymiu` 연결 완료, `profiles`·`posts` 테이블 마이그레이션 완료
 - Supabase 클라이언트: `@supabase/ssr`의 `createBrowserClient` 패턴 사용 (`lib/supabase/client.ts`)
-- 인증: Supabase Auth 예정 (코드 미연결)
+- **Supabase 인증 (Ch9 완료)**:
+  - 이메일/비밀번호 인증만 (소셜 로그인 없음)
+  - `signInWithPassword()` 사용, 구버전 `auth.signIn()` 사용 없음 확인
+  - `proxy.ts` (Next.js 16.2.1에서 middleware.ts → proxy.ts)로 `/posts/new`, `/mypage` 보호
+  - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` 환경변수 유지
+  - `service_role` 키 클라이언트 절대 금지 — 확인 완료
+- 인증: **완료** — `lib/auth.ts`, `contexts/AuthContext.tsx`, `lib/supabase/server.ts` 구현
 - 이미지: Supabase Storage 예정 (코드 미연결)
 - 배포: Vercel (dkstpwjd2-2207s-projects/my-first-web), Supabase 환경변수 Production 등록 완료
 - 작업 관리: 작업 시작 전 `context.md`와 `todo.md`를 참고하고, 작업 중/종료 시 두 파일을 현재 상태로 갱신
@@ -33,11 +39,11 @@
 ## 알게 된 점
 
 - PowerShell에서 `npm` 실행 시 실행 정책 때문에 `npm.ps1`이 막힐 수 있으므로 `npm.cmd`를 사용하면 됨
-- 현재 `npm.cmd run build`는 실패함
-- 빌드 실패 원인은 `app/posts/posts-client.tsx`에서 import하는 `@/app/components/search-bar` 파일이 없기 때문임
+- `npm.cmd run build` Ch9 완료 후 **통과** (Exit code: 0)
 - 목록 페이지는 외부 API 데이터를 먼저 사용하고, 상세 페이지는 `lib/posts.ts` 데이터를 사용해서 데이터 소스가 서로 다름
 - 여러 파일의 한글 문구가 인코딩 문제로 깨져 있어 복구가 필요함
 - App Router 프로젝트이므로 `pages/` 라우터를 만들지 않고 `app/` 안에서 라우트를 관리해야 함
+- **Next.js 16.2.1에서 `middleware.ts` 파일명이 deprecated됨 → `proxy.ts`를 사용하고 함수명도 `proxy`로 변경해야 함**
 
 ## 2026-04-27 shadcn/ui check
 
@@ -112,5 +118,6 @@
 
 현재 프로젝트 상태 요약 (세션 시작 시 AI에게 전달할 한 줄):
 > Ch8 완료: Supabase 프로젝트 연결·마이그레이션·Vercel 배포까지 모두 완료.
-> 다음은 Ch9 — 실제 Supabase DB에서 데이터를 읽어 포스트 목록·상세를 교체하는 작업.
-> `@supabase/ssr`의 `createBrowserClient` 패턴으로 작업할 것.
+> **Ch9 진행 중: Supabase Auth 이메일/비밀번호 로그인·회원가입 + middleware.ts 라우트 보호 구현.**
+> `@supabase/ssr`의 `createBrowserClient` / `createServerClient` 패턴으로 작업할 것.
+> 교재 기준 버전: @supabase/supabase-js 2.47.12, @supabase/ssr 0.5.2 (실제 설치는 더 최신일 수 있음).

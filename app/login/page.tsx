@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -10,31 +14,78 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { signInWithEmail } = useAuth();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    const { error } = await signInWithEmail(email, password);
+    setLoading(false);
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+
+    router.push("/posts");
+  }
+
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
         <CardTitle>로그인</CardTitle>
         <CardDescription>
-          이메일과 비밀번호를 입력하는 기본 로그인 화면입니다.
+          이메일과 비밀번호를 입력하세요.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {error}
+            </p>
+          )}
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
               이메일
             </label>
-            <Input id="email" name="email" type="email" placeholder="you@example.com" />
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium">
               비밀번호
             </label>
-            <Input id="password" name="password" type="password" />
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </div>
-          <Button type="submit" className="w-full">로그인</Button>
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "로그인 중..." : "로그인"}
+          </Button>
         </form>
       </CardContent>
       <CardFooter className="justify-center text-sm text-muted-foreground">
@@ -46,4 +97,3 @@ export default function LoginPage() {
     </Card>
   );
 }
-

@@ -329,10 +329,50 @@ profiles (1) ──────── (N) posts
 
 ## 8. 향후 계획 (Ch8~12)
 
-| 챕터  | 작업 내용                                      |
-|------|------------------------------------------------|
-| Ch8  | Supabase 연결, profiles/posts 테이블 생성, CRUD |
-| Ch9  | Supabase Auth 이메일 로그인/회원가입            |
-| Ch10 | 포스트 수정, 검색·필터 기능                     |
-| Ch11 | RLS 정책 적용, 역할 기반 접근 제어              |
-| Ch12 | 댓글, 이미지 업로드 (Supabase Storage)          |
+| 챕터  | 상태   | 작업 내용                                                        |
+|------|--------|------------------------------------------------------------------|
+| Ch8  | ✅ 완료 | Supabase 연결, profiles/posts 테이블 생성, Vercel 배포           |
+| Ch9  | 🔄 진행 | Supabase Auth 이메일 로그인/회원가입, middleware.ts 라우트 보호  |
+| Ch10 | 예정    | 포스트 수정, 검색·필터 기능                                       |
+| Ch11 | 예정    | RLS 정책 적용, 역할 기반 접근 제어                               |
+| Ch12 | 예정    | 댓글, 이미지 업로드 (Supabase Storage)                           |
+
+---
+
+## 9. Auth 플로우 (Ch9 추가)
+
+### 9.1 이메일/비밀번호 인증 규칙
+
+- 인증 방식: 이메일/비밀번호만 (소셜 로그인 없음)
+- 로그인 함수: `supabase.auth.signInWithPassword()` — 구버전 `auth.signIn()` 사용 금지
+- 환경변수: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Ch8과 동일)
+- `service_role` 키는 클라이언트 코드에 절대 두지 않는다.
+
+### 9.2 보호 라우트
+
+| 라우트         | 보호 여부 | 미인증 시 동작        |
+|---------------|-----------|-----------------------|
+| `/posts/new`  | ✅ 보호    | `/login`으로 리다이렉트 |
+| `/mypage`     | ✅ 보호    | `/login`으로 리다이렉트 |
+| `/login`      | 비로그인만  | 로그인 상태면 `/`로    |
+| `/signup`     | 비로그인만  | 로그인 상태면 `/`로    |
+
+- 보호 구현: `middleware.ts` (App Router, `pages/` 라우터 미들웨어 금지)
+
+### 9.3 클라이언트 파일 구조
+
+```
+lib/
+├── supabase/
+│   ├── client.ts   ← createBrowserClient (클라이언트 컴포넌트용)
+│   └── server.ts   ← createServerClient (서버 컴포넌트·Server Action용)
+└── auth.ts         ← signUp / signIn / signOut 래퍼 함수
+middleware.ts        ← 라우트 보호 (프로젝트 루트)
+```
+
+### 9.4 버전 표기
+
+- 교재 기준: @supabase/supabase-js 2.47.12, @supabase/ssr 0.5.2
+- 실제 설치(package.json): @supabase/supabase-js ^2.105.1, @supabase/ssr ^0.10.2
+- 빌드 오류 발생 시 package.json 실제 버전으로 원인을 확인한다.
+
