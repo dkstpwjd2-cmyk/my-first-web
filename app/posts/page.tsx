@@ -75,9 +75,15 @@ export default async function PostsPage() {
                 <CardDescription>{post.excerpt}</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  작성자: {post.author}
-                </p>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>작성자: {post.author}</p>
+                  <div className="flex flex-wrap gap-3 text-xs">
+                    <span>좋아요 {post.likeCount}</span>
+                    <span>싫어요 {post.dislikeCount}</span>
+                    <span>댓글 {post.commentCount}</span>
+                    <span>조회수 {post.viewCount}</span>
+                  </div>
+                </div>
               </CardContent>
               <CardFooter>
                 {/* 각 글은 /posts/[id]로 이동하는 링크 제공 */}

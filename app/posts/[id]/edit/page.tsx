@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
+import AttachmentManager from "@/components/AttachmentManager";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { getAttachments } from "@/lib/attachments";
 import { getPostById, updatePost } from "@/lib/posts";
 import { createClient } from "@/lib/supabase/server";
 
@@ -41,6 +43,8 @@ export default async function EditPostPage({
   if (!user || user.id !== post.user_id) {
     redirect(`/posts/${id}`);
   }
+
+  const attachments = await getAttachments(id);
 
   async function updatePostAction(formData: FormData) {
     "use server";
@@ -111,6 +115,13 @@ export default async function EditPostPage({
             </Button>
           </div>
         </form>
+        <div className="mt-6">
+          <AttachmentManager
+            postId={id}
+            userId={user.id}
+            initialAttachments={attachments}
+          />
+        </div>
       </CardContent>
     </Card>
   );

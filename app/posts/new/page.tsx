@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+import FileUploadField from "@/components/FileUploadField";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,6 +16,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  ATTACHMENT_BUCKET,
+  buildAttachmentPath,
+  type SelectedUpload,
+} from "@/lib/fileUpload";
 import { createClient } from "@/lib/supabase/client";
 
 export default function NewPostPage() {
@@ -24,6 +30,7 @@ export default function NewPostPage() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [files, setFiles] = useState<SelectedUpload[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -77,11 +84,28 @@ export default function NewPostPage() {
       .select("id")
       .single();
 
-    setSubmitting(false);
-
     if (insertError) {
+      setSubmitting(false);
       setError(insertError.message);
       return;
+    }
+
+    const attachmentError = await uploadAttachments(
+      supabase,
+      data.id,
+      user!.id,
+      files
+    );
+
+    setSubmitting(false);
+
+    if (attachmentError) {
+      setError(`글은 저장됐지만 첨부파일 업로드에 실패했습니다. ${attachmentError}`);
+      return;
+    }
+
+    for (const item of files) {
+      if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
     }
 
     // 성공 후 새 글 상세 페이지로 이동
@@ -131,6 +155,13 @@ export default function NewPostPage() {
             />
           </div>
 
+          <FileUploadField
+            files={files}
+            disabled={submitting}
+            onChange={setFiles}
+            onError={setError}
+          />
+
           <div className="flex flex-col gap-2 sm:flex-row">
             <Button type="submit" disabled={submitting}>
               {submitting ? "저장 중..." : "저장하기"}
@@ -143,4 +174,42 @@ export default function NewPostPage() {
       </CardContent>
     </Card>
   );
+}
+
+async function uploadAttachments(
+  supabase: ReturnType<typeof createClient>,
+  postId: string,
+  userId: string,
+  files: SelectedUpload[]
+) {
+  for (const item of files) {
+    const storagePath = buildAttachmentPath(userId, postId, item.file.name);
+    const { error: uploadError } = await supabase.storage
+      .from(ATTACHMENT_BUCKET)
+      .upload(storagePath, item.file, {
+        contentType: item.file.type || "application/octet-stream",
+      });
+
+    if (uploadError) {
+      return `${item.file.name}: ${uploadError.message}`;
+    }
+
+    const { error: insertError } = await supabase
+      .from("post_attachments")
+      .insert({
+        post_id: postId,
+        user_id: userId,
+        storage_path: storagePath,
+        file_name: item.file.name,
+        file_type: item.file.type || "application/octet-stream",
+        file_size: item.file.size,
+      });
+
+    if (insertError) {
+      await supabase.storage.from(ATTACHMENT_BUCKET).remove([storagePath]);
+      return `${item.file.name}: ${insertError.message}`;
+    }
+  }
+
+  return null;
 }

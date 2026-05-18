@@ -1,4 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import { deleteAttachmentsForPost } from "@/lib/attachments";
+import { getCommentCounts } from "@/lib/comments";
+import { ensureProfile } from "@/lib/profiles";
+import { getReactionSummaries } from "@/lib/reactions";
+import type { ReactionType } from "@/lib/reactions";
+import { getViewCounts } from "@/lib/views";
 
 export type Post = {
   id: string;
@@ -8,6 +14,11 @@ export type Post = {
   date: string;
   category: string;
   excerpt: string;
+  likeCount: number;
+  dislikeCount: number;
+  currentUserReaction: ReactionType | null;
+  commentCount: number;
+  viewCount: number;
   /** Ch8 스키마의 user_id. 작성자 UI 분기에만 사용하며 실제 보안은 Ch11 RLS가 담당한다. */
   user_id?: string;
   isPractice?: boolean;
@@ -29,6 +40,11 @@ const practicePosts: Post[] = [
     category: "일상",
     author: "안세정",
     excerpt: "블로그를 시작하며 앞으로 어떤 글을 쓸지 소개합니다.",
+    likeCount: 0,
+    dislikeCount: 0,
+    currentUserReaction: null,
+    commentCount: 0,
+    viewCount: 0,
     content: `안녕하세요. 첫 번째 포스트입니다.
 
 이 공간에는 일상에서 배운 것, 만들고 싶은 것, 기록해두고 싶은 생각을 적어보려고 합니다.
@@ -43,6 +59,11 @@ const practicePosts: Post[] = [
     category: "운동",
     author: "안세정",
     excerpt: "바쁜 일상 속에서도 운동 습관을 이어가는 방법을 정리했습니다.",
+    likeCount: 0,
+    dislikeCount: 0,
+    currentUserReaction: null,
+    commentCount: 0,
+    viewCount: 0,
     content: `운동은 거창한 목표보다 반복 가능한 루틴이 더 중요합니다.
 
 처음부터 오래 하려고 하기보다 산책, 스트레칭, 가벼운 근력 운동처럼 바로 시작할 수 있는 단위로 쪼개면 좋습니다.
@@ -57,6 +78,11 @@ const practicePosts: Post[] = [
     category: "학교생활",
     author: "안세정",
     excerpt: "수업과 프로젝트를 하며 배운 점들을 소개합니다.",
+    likeCount: 0,
+    dislikeCount: 0,
+    currentUserReaction: null,
+    commentCount: 0,
+    viewCount: 0,
     content: `학교생활에서는 지식만큼이나 협업과 기록의 중요성을 많이 배웠습니다.
 
 작업을 작게 나누고, 진행 상황을 공유하고, 결과를 돌아보는 과정이 프로젝트의 완성도를 높여줍니다.
@@ -77,14 +103,14 @@ export async function getPosts(): Promise<Post[]> {
     throw new Error(error.message);
   }
 
-  return [...(data ?? []).map(mapPostRow), ...practicePosts];
+  return withPostSummaries([...(data ?? []).map(mapPostRow), ...practicePosts]);
 }
 
 export async function getPostById(id: string): Promise<Post | null> {
   const practicePost = getPracticePostById(id);
 
   if (practicePost) {
-    return practicePost;
+    return withPostSummary(practicePost);
   }
 
   if (!isSupabasePostId(id)) {
@@ -102,7 +128,7 @@ export async function getPostById(id: string): Promise<Post | null> {
     throw new Error(error.message);
   }
 
-  return data ? mapPostRow(data) : null;
+  return data ? withPostSummary(mapPostRow(data)) : null;
 }
 
 export async function createPost(input: {
@@ -173,18 +199,6 @@ export async function updatePost(
   return mapPostRow(data);
 }
 
-async function ensureProfile(userId: string) {
-  const supabase = await createClient();
-  const { error } = await supabase.from("profiles").upsert(
-    { id: userId },
-    { onConflict: "id" }
-  );
-
-  if (error) {
-    throw new Error(error.message);
-  }
-}
-
 export async function deletePostById(id: string): Promise<boolean> {
   if (getPracticePostById(id)) {
     return false;
@@ -202,6 +216,8 @@ export async function deletePostById(id: string): Promise<boolean> {
   if (!user) {
     return false;
   }
+
+  await deleteAttachmentsForPost(id, user.id);
 
   const { error } = await supabase
     .from("posts")
@@ -257,8 +273,48 @@ function mapPostRow(row: PostRow): Post {
     category: "일상",
     date: row.created_at ? formatDate(new Date(row.created_at)) : "",
     excerpt: buildExcerpt(row.content),
+    likeCount: 0,
+    dislikeCount: 0,
+    currentUserReaction: null,
+    commentCount: 0,
+    viewCount: 0,
     user_id: row.user_id ?? undefined,
   };
+}
+
+async function withPostSummary(post: Post): Promise<Post> {
+  const [postWithSummary] = await withPostSummaries([post]);
+  return postWithSummary;
+}
+
+async function withPostSummaries(posts: Post[]): Promise<Post[]> {
+  const postIds = posts.map((post) => post.id);
+  const [reactionSummaries, commentCounts, viewCounts] = await Promise.all([
+    getReactionSummaries(postIds),
+    getCommentCounts(postIds),
+    getViewCounts(postIds),
+  ]);
+
+  return posts.map((post) => {
+    const reactionSummary = reactionSummaries[post.id];
+
+    const nextPost = {
+      ...post,
+      commentCount: commentCounts[post.id] ?? 0,
+      viewCount: viewCounts[post.id] ?? 0,
+    };
+
+    if (!reactionSummary) {
+      return nextPost;
+    }
+
+    return {
+      ...nextPost,
+      likeCount: reactionSummary.likeCount,
+      dislikeCount: reactionSummary.dislikeCount,
+      currentUserReaction: reactionSummary.currentUserReaction,
+    };
+  });
 }
 
 function formatDate(value: Date): string {

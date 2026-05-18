@@ -8,6 +8,10 @@
 - 인증: Supabase Auth 이메일/비밀번호
 - 보호 라우트: `proxy.ts`에서 `/posts/new`, `/mypage`를 보호하고 비로그인 사용자를 `/login`으로 보냄
 - 데이터: 게시글 목록/상세/작성/수정/삭제가 Supabase `posts` 테이블을 사용하도록 연결됨
+- 반응: 게시글 좋아요/싫어요는 Supabase `post_reactions` 테이블에 로그인 사용자별로 1개만 저장됨
+- 댓글: 게시글 댓글은 Supabase `post_comments` 테이블에 로그인 사용자 기준으로 저장/삭제됨
+- 첨부파일: 게시글 파일은 Supabase Storage `post-attachments` 버킷과 `post_attachments` 테이블에 저장됨
+- 공유: 게시글 상세 페이지에서 Web Share API 또는 클립보드 fallback으로 현재 글 링크를 공유함
 - 빌드: `npm run build` Exit code 0 (TypeScript 오류 없음)
 
 ## 최근 수정 사항
@@ -42,8 +46,136 @@
 ## 남은 작업
 
 - 브라우저에서 실제 계정으로 글 작성 → 수정 → 삭제 흐름 확인 (④⑤⑥ 시나리오)
+- 브라우저에서 실제 계정으로 좋아요/싫어요 토글 흐름 확인
+- 브라우저에서 실제 계정으로 댓글 작성/삭제 흐름 확인
+- 브라우저에서 실제 계정으로 첨부파일 업로드/삭제 흐름 확인
+- 브라우저에서 게시글 공유 버튼 동작 확인
 - Ch11: RLS 정책 적용 (SELECT / INSERT / UPDATE / DELETE)
 - Ch12: 이미지 업로드 (Supabase Storage)
+
+## 2026-05-18 좋아요/싫어요 기능 추가
+
+### 생성/수정 파일 목록
+
+| 파일 | 변경 | 내용 |
+|---|---|---|
+| `supabase/migrations/20260518053000_create_post_reactions.sql` | 신규 | `post_reactions` 테이블, 중복 방지 unique 제약, RLS 정책 추가 |
+| `lib/reactions.ts` | 신규 | 반응 카운트 조회, 현재 사용자 반응 조회, 좋아요/싫어요 토글 함수 추가 |
+| `lib/profiles.ts` | 신규 | `profiles` 행 보정 공통 함수 분리 |
+| `components/ReactionButtons.tsx` | 신규 | 상세 페이지용 좋아요/싫어요 클라이언트 버튼과 즉시 UI 반영 |
+| `lib/posts.ts` | 수정 | `Post` 타입에 반응 카운트/상태 추가, 목록/상세 조회 시 반응 요약 병합 |
+| `app/posts/page.tsx` | 수정 | 게시글 목록 카드에 좋아요/싫어요 수 표시 |
+| `app/posts/[id]/page.tsx` | 수정 | 상세 페이지에 반응 버튼 추가, Server Action으로 토글 처리 |
+
+### 구현 메모
+
+- `post_reactions.post_id`는 `text`로 두어 Supabase DB 글(UUID)과 기존 실습 글(`1`, `2`, `3`) 모두 반응 저장이 가능하다.
+- `unique (post_id, user_id)`로 같은 사용자가 좋아요와 싫어요를 동시에 누를 수 없게 했다.
+- 같은 버튼을 다시 누르면 삭제, 반대 버튼을 누르면 `upsert`로 반응이 전환된다.
+- 비로그인 사용자는 상세 페이지에서 로그인 안내 메시지를 보고, DB에는 반응을 저장하지 않는다.
+- 마이그레이션은 연결된 Supabase 원격 DB에 `supabase db push`로 적용 완료.
+- 리뷰 후 `ensureProfile` 중복을 `lib/profiles.ts`로 분리하고, 프로필 보정 실패가 버튼 메시지로 돌아오게 보강했다.
+
+### 검증 결과
+
+- `npm.cmd run lint`: 통과
+- `npm.cmd run build`: 통과
+- Supabase 인증 사용자 기준 토글 시나리오 통과: 좋아요 증가/취소, 싫어요 증가, 좋아요↔싫어요 전환, 재로그인 후 유지
+- Playwright 실제 UI 클릭 검증 통과: 로그인 후 `/posts/1` 좋아요 0→1, 새로고침 후 유지, `/posts` 목록에도 좋아요 1 표시
+- `/posts` 200, `/posts/1` 200, 비로그인 `/posts/new` 307 확인
+- Playwright 모바일 375px 확인: 가로 overflow 없음, 반응 버튼 세로 배치 정상
+
+## 2026-05-18 댓글 기능 추가
+
+### 생성/수정 파일 목록
+
+| 파일 | 변경 | 내용 |
+|---|---|---|
+| `supabase/migrations/20260518061000_create_post_comments.sql` | 신규 | `post_comments` 테이블, 길이 제한, RLS 정책 추가 |
+| `lib/comments.ts` | 신규 | 댓글 목록/댓글 수 조회, 작성, 삭제 함수 추가 |
+| `components/CommentSection.tsx` | 신규 | 상세 페이지 댓글 목록/작성/삭제 UI 추가 |
+| `lib/posts.ts` | 수정 | `Post` 타입에 `commentCount` 추가, 목록/상세 조회 시 댓글 수 병합 |
+| `app/posts/page.tsx` | 수정 | 게시글 목록 카드에 댓글 수 표시 |
+| `app/posts/[id]/page.tsx` | 수정 | 상세 페이지 댓글 수와 댓글 영역 추가 |
+
+### 구현 메모
+
+- `post_comments.post_id`는 `text`로 두어 Supabase DB 글(UUID)과 기존 실습 글(`1`, `2`, `3`) 모두 댓글 저장이 가능하다.
+- 로그인 사용자의 `user_metadata.name` 또는 이메일 앞부분을 작성자 이름으로 저장한다.
+- 댓글 내용은 `trim()` 후 저장하며, 공백 댓글과 500자 초과 댓글을 막는다.
+- React 텍스트 렌더링만 사용하고 `dangerouslySetInnerHTML`을 쓰지 않아 댓글 HTML이 실행되지 않는다.
+- 댓글 시간은 hydration mismatch를 피하기 위해 `Asia/Seoul` 24시간 포맷으로 고정했다.
+
+### 검증 결과
+
+- `npm.cmd run lint`: 통과
+- `npm.cmd run build`: 통과
+- Supabase 인증 사용자 기준 DB 시나리오 통과: 공백 댓글 차단, 저장, 재로그인 후 유지, 본인 댓글 삭제
+- Playwright 실제 UI 검증 통과: 빈 댓글 차단, 댓글 작성 즉시 반영, 새로고침 후 유지, 목록 댓글 수 표시, 삭제 후 0개 반영
+- XSS 검증: `<script>` 입력은 `&lt;script&gt;`로 렌더링되고 실제 `script` 노드 없음
+- Playwright 모바일 375px 확인: 댓글 입력창 가로 overflow 없음
+
+## 2026-05-18 파일 업로드 기능 추가
+
+### 생성/수정 파일 목록
+
+| 파일 | 변경 | 내용 |
+|---|---|---|
+| `supabase/migrations/20260518070000_create_post_attachments.sql` | 신규 | Storage 버킷, `post_attachments` 테이블, 파일 크기/형식 제한, RLS 정책 추가 |
+| `lib/fileUpload.ts` | 신규 | 허용 확장자/MIME/용량 검증, Storage path 생성 유틸 |
+| `lib/attachments.ts` | 신규 | 첨부파일 목록 조회, 게시글 삭제 시 첨부파일 정리 함수 |
+| `components/FileUploadField.tsx` | 신규 | 작성/수정 공통 파일 선택, 검증, 이미지 미리보기 UI |
+| `components/AttachmentList.tsx` | 신규 | 상세 페이지 첨부파일 표시 UI |
+| `components/AttachmentManager.tsx` | 신규 | 수정 페이지 기존 첨부파일 확인/삭제/추가 UI |
+| `app/posts/new/page.tsx` | 수정 | 글 작성 시 파일 선택, 미리보기, Storage 업로드, 메타데이터 저장 |
+| `app/posts/[id]/edit/page.tsx` | 수정 | 수정 화면에 첨부파일 관리 영역 추가 |
+| `app/posts/[id]/page.tsx` | 수정 | 상세 페이지 첨부파일 표시 |
+| `lib/posts.ts` | 수정 | 게시글 삭제 시 첨부파일 Storage 객체와 메타데이터 함께 삭제 |
+
+### 구현 메모
+
+- 허용 확장자: `jpg`, `jpeg`, `png`, `webp`, `gif`, `pdf`, `doc`, `docx`, `hwp`, `hwpx`, `txt`.
+- 차단 확장자: 실행 파일, 스크립트 파일, 압축 파일 계열(`exe`, `bat`, `ps1`, `js`, `zip`, `rar` 등).
+- 파일 크기는 5MB 이하로 제한하며, 클라이언트 유틸/Storage bucket/table check로 중복 검증한다.
+- Storage path는 `userId/postId/uuid-fileName.ext` 형태라 사용자별 삭제 정책과 충돌하지 않는다.
+- 상세 페이지에서는 이미지는 미리보기, 문서는 파일명/다운로드 링크로 표시한다.
+- 수정 페이지에서는 기존 첨부파일 확인, 삭제, 새 파일 추가가 가능하다.
+
+### 검증 결과
+
+- `npm.cmd run lint`: 통과
+- `npm.cmd run build`: 통과
+- Supabase 원격 DB에 Storage bucket/table/policy 마이그레이션 적용 완료
+- Playwright 실제 UI 검증 통과: 위험 파일 `.exe` 차단 메시지 표시, 허용 이미지 `png` 미리보기 표시, 게시글 저장 후 상세 첨부파일 표시, 수정 화면 기존 첨부파일 표시/삭제
+- Playwright 모바일 375px 확인: 파일 입력 가로 overflow 없음
+- 콘솔 오류 없음
+- 검증용 임시 사용자/게시글/Storage 객체 정리 완료
+
+## 2026-05-18 공유 기능 추가
+
+### 생성/수정 파일 목록
+
+| 파일 | 변경 | 내용 |
+|---|---|---|
+| `components/ShareButton.tsx` | 신규 | Web Share API, clipboard, textarea fallback 기반 공유 버튼 |
+| `app/posts/[id]/page.tsx` | 수정 | 상세 페이지 footer에 공유 버튼 추가 |
+
+### 구현 메모
+
+- `navigator.share` 지원 시 제목과 URL을 네이티브 공유창으로 전달한다.
+- Web Share API가 없으면 `navigator.clipboard.writeText()`로 현재 게시글 URL을 복사한다.
+- HTTPS가 아닌 환경이나 clipboard 미지원 환경에서는 임시 `textarea`와 `document.execCommand("copy")` fallback을 사용한다.
+- 공유/복사 성공과 실패를 버튼 아래 메시지로 즉시 표시한다.
+- 사용자가 네이티브 공유창을 취소한 `AbortError`는 실패로 표시하지 않는다.
+
+### 검증 결과
+
+- `npm.cmd run lint`: 통과
+- `npm.cmd run build`: 통과
+- Playwright 검증 통과: Web Share API 미지원 환경에서 URL 복사 메시지 표시 및 복사 URL 확인
+- Playwright 검증 통과: clipboard/textarea fallback 실패 시 실패 메시지 표시
+- Playwright 모바일 375px 확인: footer 공유 버튼 가로 overflow 없음
+- 콘솔 오류 없음
 
 ## 2026-05-18 Ch10 CRUD 완성
 
@@ -140,3 +272,33 @@ const isAuthor = !!user && user.id === post.user_id;
   - `/posts/1`: 200, contains the original first post content, and has no delete button
   - `/posts/999`: 200 with the not-found message
   - Non-login `/posts/new`, `/mypage`: 307 -> `/login`
+
+## 2026-05-18 조회수 기능 추가
+
+### 생성/수정 파일 목록
+
+| 파일 | 변경 | 내용 |
+|---|---|---|
+| `supabase/migrations/20260518073000_create_post_views.sql` | 신규 | `post_views` 테이블, 읽기 RLS, `increment_post_view()` RPC 추가 |
+| `lib/views.ts` | 신규 | 조회수 목록 조회, 단일 조회, 증가 함수 추가 |
+| `components/ViewCounter.tsx` | 신규 | 상세 페이지 진입 시 조회수 증가와 30분 localStorage 중복 제한 처리 |
+| `lib/posts.ts` | 수정 | `Post.viewCount` 추가, 목록/상세 조회 시 조회수 요약 병합 |
+| `app/posts/page.tsx` | 수정 | 게시글 목록 카드에 조회수 표시 |
+| `app/posts/[id]/page.tsx` | 수정 | 상세 페이지에 조회수 표시 및 증가 Server Action 연결 |
+
+### 구현 메모
+
+- 조회수 누적값은 Supabase `post_views` 테이블에 저장한다.
+- `post_id`는 `text`로 두어 Supabase DB 글 UUID와 기존 실습 글 `1`, `2`, `3`을 모두 지원한다.
+- 상세 페이지가 실제 존재하는 글을 찾은 뒤에만 `ViewCounter`가 렌더링되므로 없는 글에서는 증가 로직이 실행되지 않는다.
+- 같은 브라우저에서 같은 게시글은 localStorage 기준 30분에 1회만 증가한다.
+- localStorage를 사용할 수 없는 환경에서는 현재 런타임 메모리 fallback으로 같은 탭 내 중복 증가를 줄인다.
+- React Strict Mode나 빠른 재렌더 상황에서 중복 호출되지 않도록 서버 호출 전에 localStorage에 조회 시각을 먼저 기록한다.
+- 추후 DB 구조를 바꿀 때는 `lib/views.ts`의 조회/증가 함수만 교체하면 UI 변경을 줄일 수 있다.
+
+### 검증 결과
+
+- `npm.cmd run lint`: 통과
+- `npm.cmd run build`: 통과
+- 원격 Supabase DB에 `npx supabase db push --yes`로 마이그레이션 적용 완료
+- 브라우저 증가/새로고침 중복 제한/목록 일관성 검증: 로컬 확인 필요 (DB는 반영됨)
