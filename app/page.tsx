@@ -28,11 +28,11 @@ export default async function Home() {
           My First Web은 수업에서 배운 웹 기술과 일상의 생각을 정리하는
           블로그입니다. 읽기 좋은 글과 꾸준한 기록에 집중합니다.
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Link href="/posts" className={buttonVariants()}>
             포스트 보러가기
           </Link>
-          <Link href="/posts/new" className={buttonVariants({ variant: "outline" })}>
+          <Link href="/posts/new" className={buttonVariants({ variant: "secondary" })}>
             새 글 작성
           </Link>
         </div>
@@ -40,7 +40,7 @@ export default async function Home() {
 
       {/* 최근 포스트 */}
       <section className="space-y-4">
-        <div className="flex items-end justify-between gap-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-2xl font-bold tracking-normal">최근 포스트</h2>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -63,18 +63,17 @@ export default async function Home() {
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {latestPosts.map((post) => (
-              <Card key={post.id} className="flex flex-col rounded-lg shadow-sm">
-                <CardHeader className="space-y-2 pb-3">
+              <Card key={post.id} className="h-full rounded-lg shadow-sm">
+                <CardHeader className="space-y-2 pb-0">
                   <PostMeta category={post.category} date={post.date} />
-                  <CardTitle className="line-clamp-2 break-words text-base leading-snug">
+                  <CardTitle className="line-clamp-2 min-h-11 break-words text-base leading-snug">
                     {post.title}
                   </CardTitle>
-                  <CardDescription className="line-clamp-3 break-words">
+                  <CardDescription className="line-clamp-2 min-h-12 break-words leading-6">
                     {post.excerpt}
                   </CardDescription>
                 </CardHeader>
-                <div className="flex-1" />
-                <CardContent className="pt-2 pb-3">
+                <CardContent className="mt-auto pt-0 pb-4">
                   <Link
                     href={`/posts/${post.id}`}
                     className={buttonVariants({ variant: "outline", size: "sm" })}
