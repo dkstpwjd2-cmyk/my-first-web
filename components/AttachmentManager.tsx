@@ -85,6 +85,7 @@ export default function AttachmentManager({
         fileName: data.file_name,
         fileType: data.file_type,
         fileSize: data.file_size,
+        storagePath,
         publicUrl,
         isImage: data.file_type.startsWith("image/"),
         createdAt: data.created_at ?? "",
@@ -106,12 +107,11 @@ export default function AttachmentManager({
     setMessage(null);
 
     const supabase = createClient();
-    const storagePath = getStoragePathFromPublicUrl(attachment.publicUrl);
 
-    if (storagePath) {
+    if (attachment.storagePath) {
       const { error: removeError } = await supabase.storage
         .from(ATTACHMENT_BUCKET)
-        .remove([storagePath]);
+        .remove([attachment.storagePath]);
 
       if (removeError) {
         setMessage(removeError.message);
@@ -196,15 +196,4 @@ export default function AttachmentManager({
       </div>
     </section>
   );
-}
-
-function getStoragePathFromPublicUrl(publicUrl: string) {
-  const marker = `/${ATTACHMENT_BUCKET}/`;
-  const index = publicUrl.indexOf(marker);
-
-  if (index < 0) {
-    return "";
-  }
-
-  return decodeURIComponent(publicUrl.slice(index + marker.length));
 }

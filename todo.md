@@ -188,3 +188,11 @@
 - [x] `npm.cmd run build` 통과
 - [x] 원격 Supabase DB에 조회수 마이그레이션 적용 (`npx supabase db push --yes`)
 - [ ] DB 적용 후 실제 브라우저에서 증가/새로고침 중복 제한/목록 일관성 검증
+
+## 2026-05-18 통합 품질 점검 수정
+
+- [x] `revalidatePath` 과다 호출 제거 (`incrementViewAction` 조회수만 invalidate, 반응/댓글 홈 invalidate 제거)
+- [x] `PostAttachment` 타입에 `storagePath` 추가, `getAttachments()` 반환에 포함
+- [x] `AttachmentManager` URL 파싱 함수 제거, `attachment.storagePath` 직접 사용
+- [x] `formatFileSize` `lib/fileUpload.ts`로 통합, `AttachmentList`·`FileUploadField` 중복 제거
+- [x] `npm.cmd run build` 통과

@@ -7,6 +7,7 @@ export type PostAttachment = {
   fileName: string;
   fileType: string;
   fileSize: number;
+  storagePath: string;
   publicUrl: string;
   isImage: boolean;
   createdAt: string;
@@ -45,6 +46,7 @@ export async function getAttachments(postId: string): Promise<PostAttachment[]> 
       fileName: row.file_name,
       fileType: row.file_type,
       fileSize: row.file_size,
+      storagePath: row.storage_path,
       publicUrl,
       isImage: isImageAttachment(row.file_type),
       createdAt: row.created_at ?? "",

@@ -1,6 +1,7 @@
 import { FileText } from "lucide-react";
 
 import type { PostAttachment } from "@/lib/attachments";
+import { formatFileSize } from "@/lib/fileUpload";
 
 type AttachmentListProps = {
   attachments: PostAttachment[];
@@ -44,12 +45,4 @@ export default function AttachmentList({ attachments }: AttachmentListProps) {
       </div>
     </section>
   );
-}
-
-function formatFileSize(size: number) {
-  if (size < 1024 * 1024) {
-    return `${Math.ceil(size / 1024)}KB`;
-  }
-
-  return `${(size / 1024 / 1024).toFixed(1)}MB`;
 }

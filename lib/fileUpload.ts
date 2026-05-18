@@ -120,3 +120,11 @@ export function buildAttachmentPath(
 function getFileExtension(fileName: string) {
   return fileName.split(".").pop()?.toLowerCase() ?? "";
 }
+
+export function formatFileSize(size: number) {
+  if (size < 1024 * 1024) {
+    return `${Math.ceil(size / 1024)}KB`;
+  }
+
+  return `${(size / 1024 / 1024).toFixed(1)}MB`;
+}

@@ -331,3 +331,34 @@ const isAuthor = !!user && user.id === post.user_id;
 - 공개 URL에 `?t=timestamp` 캐시버스터 적용
 - `npx supabase db push --yes` 완료
 - `npm.cmd run build` 통과
+
+## 2026-05-18 통합 품질 점검 수정
+
+좋아요/싫어요·댓글·파일 업로드·공유·조회수 전체 기능 코드 리뷰 후 3개 버그 수정.
+
+| 파일 | 변경 | 내용 |
+|---|---|---|
+| `app/posts/[id]/page.tsx` | 수정 | `incrementViewAction`에서 `revalidatePath("/")`, `revalidatePath("/posts")` 제거; 반응/댓글 액션에서도 `revalidatePath("/")` 제거 |
+| `lib/attachments.ts` | 수정 | `PostAttachment` 타입에 `storagePath` 필드 추가, `getAttachments()` 반환값에 포함 |
+| `components/AttachmentManager.tsx` | 수정 | `getStoragePathFromPublicUrl()` URL 파싱 함수 제거, `attachment.storagePath` 직접 사용; `uploaded.push`에 `storagePath` 포함 |
+| `lib/fileUpload.ts` | 수정 | `formatFileSize()` 유틸 함수 추가 및 export |
+| `components/AttachmentList.tsx` | 수정 | 중복 `formatFileSize` 제거, `lib/fileUpload`에서 import |
+| `components/FileUploadField.tsx` | 수정 | 중복 `formatFileSize` 제거, `lib/fileUpload`에서 import |
+
+### 수정된 버그 요약
+
+1. **revalidatePath 과다 호출**: `incrementViewAction`이 `/`와 `/posts` 캐시를 불필요하게 무효화해 조회할 때마다 홈+목록 전체 재렌더. → 조회수는 해당 상세 페이지만 invalidate. 반응/댓글 액션도 홈(`/`) invalidate 제거.
+
+2. **PostAttachment storagePath 누락**: `PostAttachment` 타입에 `storagePath`가 없어 `AttachmentManager`가 공개 URL을 파싱해 Storage 경로를 추출하는 취약한 방법을 사용. → 타입에 필드 추가 및 직접 전달.
+
+3. **formatFileSize 중복**: `AttachmentList.tsx`와 `FileUploadField.tsx` 두 곳에 동일한 함수 복사. → `lib/fileUpload.ts` 단일 출처로 통합.
+
+### 플래그 항목 (수정하지 않음 — 별도 확인 필요)
+
+- **검색 쿼리 인젝션**: `getPosts`에서 `query`를 `.or(`title.ilike.%${query}%,...`)` 문자열 보간으로 전달. `,`나 `)` 포함 쿼리가 PostgREST 파싱 오류 유발 가능. 범위 초과로 보류.
+- **NewPostPage `ensureProfile` 누락**: 이메일 인증 직후 첫 글 작성 시 `profiles` 행이 없으면 FK violation 가능성. 범위 초과로 보류.
+- **아바타 확장자 소문자 미처리**: `.PNG`같은 대문자 확장자가 그대로 path에 들어감. 범위 초과로 보류.
+
+### 검증 결과
+
+- `npm.cmd run build`: 통과

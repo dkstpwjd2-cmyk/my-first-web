@@ -58,7 +58,6 @@ async function toggleReactionAction(id: string, reaction: ReactionType) {
   "use server";
 
   const result = await togglePostReaction(id, reaction);
-  revalidatePath("/");
   revalidatePath("/posts");
   revalidatePath(`/posts/${id}`);
   return result;
@@ -68,7 +67,6 @@ async function createCommentAction(id: string, content: string) {
   "use server";
 
   const result = await createComment(id, content);
-  revalidatePath("/");
   revalidatePath("/posts");
   revalidatePath(`/posts/${id}`);
   return result;
@@ -78,7 +76,6 @@ async function deleteCommentAction(id: string, commentId: string) {
   "use server";
 
   const result = await deleteComment(id, commentId);
-  revalidatePath("/");
   revalidatePath("/posts");
   revalidatePath(`/posts/${id}`);
   return result;
@@ -88,8 +85,6 @@ async function incrementViewAction(id: string) {
   "use server";
 
   const result = await incrementPostView(id);
-  revalidatePath("/");
-  revalidatePath("/posts");
   revalidatePath(`/posts/${id}`);
   return result;
 }
