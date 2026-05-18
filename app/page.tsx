@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import EmptyState from "@/components/EmptyState";
+import PostMeta from "@/components/PostMeta";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -16,6 +18,7 @@ export default async function Home() {
 
   return (
     <div className="space-y-8">
+      {/* 히어로 */}
       <section className="space-y-4 border-b border-border pb-8">
         <p className="text-sm font-medium text-primary">개인 블로그</p>
         <h1 className="max-w-2xl text-4xl font-bold leading-tight tracking-normal">
@@ -25,7 +28,7 @@ export default async function Home() {
           My First Web은 수업에서 배운 웹 기술과 일상의 생각을 정리하는
           블로그입니다. 읽기 좋은 글과 꾸준한 기록에 집중합니다.
         </p>
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex flex-wrap gap-2">
           <Link href="/posts" className={buttonVariants()}>
             포스트 보러가기
           </Link>
@@ -35,6 +38,7 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* 최근 포스트 */}
       <section className="space-y-4">
         <div className="flex items-end justify-between gap-4">
           <div>
@@ -45,39 +49,35 @@ export default async function Home() {
           </div>
           <Link
             href="/posts"
-            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            className="shrink-0 text-sm font-medium text-primary underline-offset-4 hover:underline"
           >
             전체 보기
           </Link>
         </div>
 
         {latestPosts.length === 0 ? (
-          <Card className="rounded-lg shadow-sm">
-            <CardHeader>
-              <CardTitle>아직 포스트가 없습니다</CardTitle>
-              <CardDescription>
-                로그인 후 첫 번째 글을 작성해 보세요.
-              </CardDescription>
-            </CardHeader>
-          </Card>
+          <EmptyState
+            title="아직 포스트가 없습니다"
+            description="로그인 후 첫 번째 글을 작성해 보세요."
+          />
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {latestPosts.map((post) => (
-              <Card key={post.id} className="rounded-lg shadow-sm">
-                <CardHeader>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span className="rounded-lg bg-accent px-2 py-1 text-accent-foreground">
-                      {post.category}
-                    </span>
-                    <span>{post.date || "기록"}</span>
-                  </div>
-                  <CardTitle>{post.title}</CardTitle>
-                  <CardDescription>{post.excerpt}</CardDescription>
+              <Card key={post.id} className="flex flex-col rounded-lg shadow-sm">
+                <CardHeader className="space-y-2 pb-3">
+                  <PostMeta category={post.category} date={post.date} />
+                  <CardTitle className="line-clamp-2 break-words text-base leading-snug">
+                    {post.title}
+                  </CardTitle>
+                  <CardDescription className="line-clamp-3 break-words">
+                    {post.excerpt}
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <div className="flex-1" />
+                <CardContent className="pt-2 pb-3">
                   <Link
                     href={`/posts/${post.id}`}
-                    className={buttonVariants({ variant: "outline" })}
+                    className={buttonVariants({ variant: "outline", size: "sm" })}
                   >
                     상세 보기
                   </Link>

@@ -100,8 +100,10 @@ export async function getPosts(query?: string): Promise<Post[]> {
     .order("created_at", { ascending: false });
 
   if (query) {
+    // PostgREST .or() 파싱 오류를 막기 위해 쿼리 내 특수문자를 이스케이프한다.
+    const safeQuery = query.replace(/[%_,)]/g, (c) => `\\${c}`);
     dbQuery = dbQuery.or(
-      `title.ilike.%${query}%,content.ilike.%${query}%`
+      `title.ilike.%${safeQuery}%,content.ilike.%${safeQuery}%`
     );
   }
 

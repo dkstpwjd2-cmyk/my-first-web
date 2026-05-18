@@ -27,11 +27,22 @@ export default function AttachmentManager({
   const [attachments, setAttachments] = useState(initialAttachments);
   const [files, setFiles] = useState<SelectedUpload[]>([]);
   const [message, setMessage] = useState<string | null>(null);
+  const [isError, setIsError] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  function setSuccess(msg: string) {
+    setIsError(false);
+    setMessage(msg);
+  }
+
+  function setErrorMsg(msg: string) {
+    setIsError(true);
+    setMessage(msg);
+  }
 
   async function uploadFiles() {
     if (files.length === 0) {
-      setMessage("업로드할 파일을 선택해 주세요.");
+      setErrorMsg("업로드할 파일을 선택해 주세요.");
       return;
     }
 
@@ -50,7 +61,7 @@ export default function AttachmentManager({
         });
 
       if (uploadError) {
-        setMessage(`${item.file.name}: ${uploadError.message}`);
+        setErrorMsg(`${item.file.name}: ${uploadError.message}`);
         setBusy(false);
         return;
       }
@@ -70,7 +81,7 @@ export default function AttachmentManager({
 
       if (insertError) {
         await supabase.storage.from(ATTACHMENT_BUCKET).remove([storagePath]);
-        setMessage(`${item.file.name}: ${insertError.message}`);
+        setErrorMsg(`${item.file.name}: ${insertError.message}`);
         setBusy(false);
         return;
       }
@@ -98,7 +109,7 @@ export default function AttachmentManager({
 
     setAttachments([...attachments, ...uploaded]);
     setFiles([]);
-    setMessage("첨부파일을 업로드했습니다.");
+    setSuccess("첨부파일을 업로드했습니다.");
     setBusy(false);
   }
 
@@ -114,7 +125,7 @@ export default function AttachmentManager({
         .remove([attachment.storagePath]);
 
       if (removeError) {
-        setMessage(removeError.message);
+        setErrorMsg(removeError.message);
         setBusy(false);
         return;
       }
@@ -128,13 +139,13 @@ export default function AttachmentManager({
       .eq("user_id", userId);
 
     if (deleteMetaError) {
-      setMessage(deleteMetaError.message);
+      setErrorMsg(deleteMetaError.message);
       setBusy(false);
       return;
     }
 
     setAttachments(attachments.filter((item) => item.id !== attachment.id));
-    setMessage("첨부파일을 삭제했습니다.");
+    setSuccess("첨부파일을 삭제했습니다.");
     setBusy(false);
   }
 
@@ -189,7 +200,11 @@ export default function AttachmentManager({
       />
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        {message && <p className="text-sm text-muted-foreground">{message}</p>}
+        {message && (
+        <p className={`text-sm ${isError ? "text-destructive" : "text-muted-foreground"}`}>
+          {message}
+        </p>
+      )}
         <Button type="button" disabled={busy || files.length === 0} onClick={uploadFiles}>
           {busy ? "처리 중..." : "첨부파일 업로드"}
         </Button>

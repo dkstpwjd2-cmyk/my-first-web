@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import FileUploadField from "@/components/FileUploadField";
+import FormActions from "@/components/FormActions";
+import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,7 +26,6 @@ import {
 import { createClient } from "@/lib/supabase/client";
 
 export default function NewPostPage() {
-  // Ch9의 useAuth()로 현재 로그인 사용자 확인
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -34,7 +35,6 @@ export default function NewPostPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // 인증 로딩 중
   if (loading) {
     return (
       <Card className="rounded-lg shadow-sm">
@@ -45,7 +45,6 @@ export default function NewPostPage() {
     );
   }
 
-  // 비로그인 상태 안내
   if (!user) {
     return (
       <Card className="rounded-lg shadow-sm">
@@ -71,9 +70,18 @@ export default function NewPostPage() {
     setSubmitting(true);
     setError(null);
 
-    // Ch8의 lib/supabase/client.ts (createBrowserClient) 사용
-    // user_id는 폼 입력값이 아닌 useAuth()의 user.id를 사용
     const supabase = createClient();
+
+    // 이메일 인증 직후 첫 글 작성 시 profiles 행이 없으면 FK violation이 발생할 수 있다.
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .upsert({ id: user!.id }, { onConflict: "id" });
+    if (profileError) {
+      setSubmitting(false);
+      setError("프로필 초기화에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      return;
+    }
+
     const { data, error: insertError } = await supabase
       .from("posts")
       .insert({
@@ -108,71 +116,72 @@ export default function NewPostPage() {
       if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
     }
 
-    // 성공 후 새 글 상세 페이지로 이동
     router.push(`/posts/${data.id}`);
   }
 
   return (
-    <Card className="rounded-lg shadow-sm">
-      <CardHeader>
-        <CardTitle>포스트 작성</CardTitle>
-        <CardDescription>
-          제목과 내용을 입력하면 새 포스트가 저장됩니다.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <p className="text-sm text-destructive">{error}</p>
-          )}
+    <div className="space-y-6">
+      <PageHeader title="포스트 작성" description="제목과 내용을 입력하면 새 포스트가 저장됩니다." />
 
-          <div className="space-y-2">
-            <label htmlFor="title" className="text-sm font-medium">
-              제목
-            </label>
-            <Input
-              id="title"
-              name="title"
-              required
-              placeholder="제목을 입력하세요"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
+      <Card className="rounded-lg shadow-sm">
+        <CardContent className="pt-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                {error}
+              </p>
+            )}
 
-          <div className="space-y-2">
-            <label htmlFor="content" className="text-sm font-medium">
-              내용
-            </label>
-            <Textarea
-              id="content"
-              name="content"
-              required
-              className="min-h-64"
-              placeholder="내용을 입력하세요"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-            />
-          </div>
+            <div className="space-y-2">
+              <label htmlFor="title" className="text-sm font-medium">
+                제목
+              </label>
+              <Input
+                id="title"
+                name="title"
+                required
+                placeholder="제목을 입력하세요"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
 
-          <FileUploadField
-            files={files}
-            disabled={submitting}
-            onChange={setFiles}
-            onError={setError}
-          />
+            <div className="space-y-2">
+              <label htmlFor="content" className="text-sm font-medium">
+                내용
+              </label>
+              <Textarea
+                id="content"
+                name="content"
+                required
+                className="min-h-72"
+                placeholder="내용을 입력하세요"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+              />
+            </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "저장 중..." : "저장하기"}
-            </Button>
-            <Button asChild type="button" variant="outline">
-              <Link href="/posts">취소</Link>
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+            <div className="rounded-lg border border-border bg-muted/30 p-4">
+              <FileUploadField
+                files={files}
+                disabled={submitting}
+                onChange={setFiles}
+                onError={setError}
+              />
+            </div>
+
+            <FormActions>
+              <Button type="submit" disabled={submitting}>
+                {submitting ? "저장 중..." : "저장하기"}
+              </Button>
+              <Button asChild type="button" variant="outline">
+                <Link href="/posts">취소</Link>
+              </Button>
+            </FormActions>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

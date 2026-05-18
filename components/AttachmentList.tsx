@@ -13,16 +13,17 @@ export default function AttachmentList({ attachments }: AttachmentListProps) {
   }
 
   return (
-    <section className="mt-6 border-t border-border pt-6">
-      <h2 className="text-xl font-bold tracking-normal">첨부파일</h2>
-      <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+    <section className="border-t border-border pt-6" aria-label="첨부파일">
+      <h2 className="mb-3 text-base font-bold tracking-normal">첨부파일</h2>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {attachments.map((attachment) => (
           <a
             key={attachment.id}
             href={attachment.publicUrl}
             target="_blank"
             rel="noreferrer"
-            className="rounded-lg border border-border bg-background p-3 text-sm transition hover:bg-muted/50"
+            aria-label={`${attachment.fileName} - 새 탭에서 열기`}
+            className="group rounded-lg border border-border bg-background p-3 text-sm transition hover:bg-muted/50"
           >
             {attachment.isImage ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -36,7 +37,9 @@ export default function AttachmentList({ attachments }: AttachmentListProps) {
                 <FileText aria-hidden="true" />
               </div>
             )}
-            <p className="truncate font-medium">{attachment.fileName}</p>
+            <p className="break-all font-medium leading-snug">
+              {attachment.fileName}
+            </p>
             <p className="mt-1 text-xs text-muted-foreground">
               {formatFileSize(attachment.fileSize)}
             </p>

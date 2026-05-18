@@ -196,3 +196,21 @@
 - [x] `AttachmentManager` URL 파싱 함수 제거, `attachment.storagePath` 직접 사용
 - [x] `formatFileSize` `lib/fileUpload.ts`로 통합, `AttachmentList`·`FileUploadField` 중복 제거
 - [x] `npm.cmd run build` 통과
+
+## 2026-05-18 최종 품질 검증 (14개 항목)
+
+- [x] `npm run build` Exit code 0 확인
+- [x] TypeScript 오류 없음 확인
+- [x] 미사용 import/변수 없음 확인
+- [x] 검색 쿼리 특수문자 이스케이프 추가 (`lib/posts.ts`)
+- [x] `app/posts/new/page.tsx` — posts insert 전 `profiles` upsert 추가로 FK violation 방지
+- [x] `AvatarUpload.tsx` — 숨겨진 file input에 `aria-label` 추가
+- [x] `AvatarUpload.tsx` — 확장자 소문자 정규화 (`.PNG` → `.png`)
+- [x] `AttachmentManager.tsx` — 에러/성공 메시지 색상 구분
+- [x] `AttachmentList.tsx` — 첨부파일 링크 `aria-label` 추가
+- [x] 모든 버튼/입력창 label 또는 aria 속성 확인
+- [x] `dangerouslySetInnerHTML` 미사용 확인 (댓글 XSS 안전)
+- [x] 위험 파일 확장자 차단 확인 (`lib/fileUpload.ts`)
+- [x] `localStorage` key 접두사 `my-first-web:post-view:` 충돌 없음 확인
+- [x] 게시글 삭제 시 첨부파일 Storage + 메타데이터 함께 삭제 확인
+- [x] `npm run build` Exit code 0 최종 확인

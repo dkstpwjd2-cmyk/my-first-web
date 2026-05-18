@@ -2,7 +2,7 @@
 
 ## 현재 상태
 
-- 마지막 업데이트: 2026-05-18
+- 마지막 업데이트: 2026-05-18 (UI/UX 안정화 완료)
 - 완료 챕터: Ch7~Ch12 전체 완료 (CRUD, Auth, 반응/댓글/파일/공유/조회수/검색/아바타, RLS)
 - 기술 스택: Next.js 16.2.1 App Router, React 19.2.4, Tailwind CSS 4, shadcn/ui, Supabase
 - 인증: Supabase Auth 이메일/비밀번호
@@ -362,3 +362,19 @@ const isAuthor = !!user && user.id === post.user_id;
 ### 검증 결과
 
 - `npm.cmd run build`: 통과
+
+## 2026-05-18 최종 품질 검증 수정
+
+전체 소스 코드 정적 분석 및 14개 항목 품질 점검 후 5개 항목 수정.
+
+| 파일 | 변경 | 내용 |
+|---|---|---|
+| `lib/posts.ts` | 수정 | 검색 쿼리 내 `,` `)` `%` `_` 특수문자 이스케이프로 PostgREST `.or()` 파싱 오류 방지 |
+| `app/posts/new/page.tsx` | 수정 | posts insert 전 `profiles` upsert 추가 — 이메일 인증 직후 FK violation 방지 |
+| `components/AvatarUpload.tsx` | 수정 | 숨겨진 file input에 `aria-label` 추가 / 확장자 소문자 정규화 (`.PNG` → `.png`) |
+| `components/AttachmentManager.tsx` | 수정 | 에러 메시지 `text-destructive`, 성공 메시지 `text-muted-foreground`로 색상 구분 |
+| `components/AttachmentList.tsx` | 수정 | 첨부파일 링크에 `aria-label` 추가 (새 탭 열기 안내) |
+
+### 검증 결과
+
+- `npm run build`: Exit code 0 (TypeScript 오류 없음)

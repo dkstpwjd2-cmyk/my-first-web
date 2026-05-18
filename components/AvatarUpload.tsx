@@ -44,7 +44,7 @@ export default function AvatarUpload({
     setStatus("uploading");
     setMessage("");
 
-    const ext = file.name.split(".").pop() ?? "jpg";
+    const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
     const path = `${userId}/avatar.${ext}`;
     const supabase = createClient();
 
@@ -97,6 +97,7 @@ export default function AvatarUpload({
         ref={inputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp,image/gif"
+        aria-label="프로필 이미지 파일 선택"
         className="hidden"
         onChange={handleChange}
       />
