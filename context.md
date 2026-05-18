@@ -47,15 +47,54 @@
 
 ## 2026-05-18 Ch10 CRUD 완성
 
-- `Post` 타입에 `user_id?: string` 필드 추가 (Ch11 RLS 보안의 선행 단계인 UI 분기용)
-- `lib/posts.ts` Supabase 쿼리에 `user_id` 컬럼 추가
-- `updatePost(id, { title, content })` 함수 추가: `.eq("id", id).eq("user_id", user.id)` 조건 포함
-- `app/posts/[id]/page.tsx`: 서버에서 현재 사용자 조회 후 `isAuthor` 판별, 작성자에게만 수정/삭제 버튼 표시
-- `app/posts/[id]/edit/page.tsx` 신규 생성: 비작성자 redirect, Server Action으로 updatePost() 호출
-- 이 UI 분기는 UX이며, 실제 보안은 Ch11 RLS에서 DB 정책으로 처리한다.
-- 검증:
-  - `npm.cmd run build`: 통과 (Exit code: 0)
-  - 빌드 라우트 목록에 `ƒ /posts/[id]/edit` 확인됨
+### 생성/수정 파일 목록
+
+| 파일 | 변경 | 내용 |
+|---|---|---|
+| `lib/posts.ts` | 수정 | `getPosts`, `getPostById`, `createPost`, `updatePost`, `deletePostById` Supabase 구현 |
+| `app/posts/page.tsx` | 수정 | Supabase 목록 조회 + 에러 핸들링 |
+| `app/posts/[id]/page.tsx` | 수정 | `notFound()`, `isAuthor` UI 분기, 삭제 Server Action + 에러 처리 |
+| `app/posts/new/page.tsx` | 수정 | `"use client"`, `useAuth()`, 브라우저 클라이언트 insert |
+| `app/posts/[id]/edit/page.tsx` | **신규** | 수정 폼, `updatePostAction`, 에러 처리 |
+
+### Supabase 쿼리 패턴
+
+```ts
+// SELECT — 목록 (created_at 내림차순)
+supabase.from("posts").select("id, title, content, created_at, user_id").order("created_at", { ascending: false })
+
+// SELECT — 상세
+supabase.from("posts").select("id, title, content, created_at, user_id").eq("id", id).single()
+
+// INSERT — user_id는 폼 입력값이 아닌 코드에서 삽입
+supabase.from("posts").insert({ title, content, user_id: user.id }).select("id").single()
+
+// UPDATE — .eq("id") 필수
+supabase.from("posts").update({ title, content }).eq("id", id).eq("user_id", user.id)
+
+// DELETE — .eq("id") 필수
+supabase.from("posts").delete().eq("id", id).eq("user_id", user.id)
+```
+
+### 작성자 UI 분기 패턴
+
+```ts
+// 서버 컴포넌트에서 isAuthor 판별 — UX 목적, 실제 보안은 Ch11 RLS
+const { data: { user } } = await supabase.auth.getUser();
+const isAuthor = !!user && user.id === post.user_id;
+
+// JSX에서 조건부 렌더링
+{isAuthor && <Button>수정</Button>}
+{isAuthor && <Button variant="destructive">삭제</Button>}
+// ※ 이 분기는 UX이며, 실제 보안은 Ch11 RLS에서 DB 정책으로 처리한다.
+```
+
+### 검증 결과
+
+- `npm run build`: Exit code 0
+- 브라우저: `/posts` 목록, `/posts/[id]` 상세, `notFound()`, 비로그인 `/posts/new` → redirect 확인
+- grep: `next/router`, `auth.signIn`, `service_role` 패턴 미검출
+- Vercel: Production 배포 완료 (Ready)
 
 ## 2026-05-13 Auth redirect follow-up
 

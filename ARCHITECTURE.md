@@ -364,16 +364,24 @@ profiles (1) ──────── (N) posts
 - 환경변수: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Ch8과 동일)
 - `service_role` 키는 클라이언트 코드에 절대 두지 않는다.
 
-### 9.2 보호 라우트
+### 9.2 경로별 인증 요건
 
-| 라우트         | 보호 여부 | 미인증 시 동작        |
-|---------------|-----------|-----------------------|
-| `/posts/new`  | ✅ 보호    | `/login`으로 리다이렉트 |
-| `/mypage`     | ✅ 보호    | `/login`으로 리다이렉트 |
-| `/login`      | 비로그인만  | 로그인 상태면 `/`로    |
-| `/signup`     | 비로그인만  | 로그인 상태면 `/`로    |
+| 라우트 | 유형 | 미인증 시 동작 | 인증 시 동작 |
+|---|---|---|---|
+| `/` | 🌐 공개 | 정상 표시 | 정상 표시 |
+| `/posts` | 🌐 공개 | 정상 표시 | 정상 표시 |
+| `/posts/[id]` | 🌐 공개 | 정상 표시 (수정/삭제 버튼 숨김) | 작성자면 수정/삭제 버튼 표시 |
+| `/posts/new` | 🔒 보호 | `/login`으로 redirect | 글 작성 폼 표시 |
+| `/posts/[id]/edit` | 🔒 보호 + 작성자 | `/login` 또는 `/posts/[id]`로 redirect | 수정 폼 표시 |
+| `/mypage` | 🔒 보호 | `/login`으로 redirect | 프로필 + 글 수 표시 |
+| `/login` | 비로그인 전용 | 로그인 폼 표시 | `/`로 redirect |
+| `/signup` | 비로그인 전용 | 회원가입 폼 표시 | `/`로 redirect |
 
+- **🌐 공개**: 누구나 접근 가능
+- **🔒 보호**: `middleware.ts`가 비인증 사용자를 `/login`으로 redirect
+- **작성자 전용 UI**: `isAuthor` 체크 — UX 목적, 실제 보안은 Ch11 RLS
 - 보호 구현: `middleware.ts` (App Router, `pages/` 라우터 미들웨어 금지)
+
 
 ### 9.3 클라이언트 파일 구조
 
