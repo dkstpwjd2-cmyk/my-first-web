@@ -21,13 +21,13 @@
 
 ## 남은 필수 확인
 
-- [ ] Supabase 대시보드 Email Provider 설정 확인
-- [ ] Supabase URL Configuration에 로컬/배포 URL 확인
-- [ ] 브라우저에서 실제 회원가입 테스트
-- [ ] 브라우저에서 실제 로그인 테스트
-- [ ] 로그인 상태에서 `/posts/new` 글 작성 테스트
-- [ ] 작성한 글의 상세 페이지 확인
-- [ ] 로그아웃 후 보호 라우트 접근 차단 확인
+- [x] Supabase 대시보드 Email Provider 설정 확인
+- [x] Supabase URL Configuration에 로컬/배포 URL 확인
+- [x] 브라우저에서 실제 회원가입 테스트
+- [x] 브라우저에서 실제 로그인 테스트
+- [x] 로그인 상태에서 `/posts/new` 글 작성 테스트
+- [x] 작성한 글의 상세 페이지 확인
+- [x] 로그아웃 후 보호 라우트 접근 차단 확인
 - [ ] Vercel 배포 후 같은 흐름 재검증
 
 ## 2026-05-13 추가 수정
