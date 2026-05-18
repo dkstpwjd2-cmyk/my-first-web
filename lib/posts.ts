@@ -8,6 +8,8 @@ export type Post = {
   date: string;
   category: string;
   excerpt: string;
+  /** Ch8 스키마의 user_id. 작성자 UI 분기에만 사용하며 실제 보안은 Ch11 RLS가 담당한다. */
+  user_id?: string;
   isPractice?: boolean;
 };
 
@@ -16,6 +18,7 @@ type PostRow = {
   title: string;
   content: string;
   created_at: string | null;
+  user_id: string | null;
 };
 
 const practicePosts: Post[] = [
@@ -67,7 +70,7 @@ export async function getPosts(): Promise<Post[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("posts")
-    .select("id, title, content, created_at")
+    .select("id, title, content, created_at, user_id")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -91,7 +94,7 @@ export async function getPostById(id: string): Promise<Post | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("posts")
-    .select("id, title, content, created_at")
+    .select("id, title, content, created_at, user_id")
     .eq("id", id)
     .maybeSingle();
 
@@ -123,7 +126,44 @@ export async function createPost(input: {
   const { data, error } = await supabase
     .from("posts")
     .insert({ title, content, user_id: user.id })
-    .select("id, title, content, created_at")
+    .select("id, title, content, created_at, user_id")
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return mapPostRow(data);
+}
+
+export async function updatePost(
+  id: string,
+  input: { title: string; content: string }
+): Promise<Post> {
+  if (!isSupabasePostId(id)) {
+    throw new Error("잘못된 포스트 ID입니다.");
+  }
+
+  const title = input.title.trim();
+  const content = input.content.trim();
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("로그인이 필요합니다.");
+  }
+
+  // .eq("user_id", user.id) 조건으로 작성자만 수정 가능.
+  // 실제 보안은 Ch11 RLS에서 데이터베이스 정책으로 처리한다.
+  const { data, error } = await supabase
+    .from("posts")
+    .update({ title, content })
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .select("id, title, content, created_at, user_id")
     .single();
 
   if (error) {
@@ -217,6 +257,7 @@ function mapPostRow(row: PostRow): Post {
     category: "일상",
     date: row.created_at ? formatDate(new Date(row.created_at)) : "",
     excerpt: buildExcerpt(row.content),
+    user_id: row.user_id ?? undefined,
   };
 }
 

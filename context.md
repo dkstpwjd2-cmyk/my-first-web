@@ -2,13 +2,13 @@
 
 ## 현재 상태
 
-- 마지막 업데이트: 2026-05-13
-- 완료 챕터: Ch7 아키텍처/UI, Ch8 Supabase 연결/배포 준비, Ch9 Supabase Auth
+- 마지막 업데이트: 2026-05-18
+- 완료 챕터: Ch7 아키텍처/UI, Ch8 Supabase 연결/배포, Ch9 Supabase Auth, Ch10 Supabase CRUD (목록/상세/작성/수정/삭제)
 - 기술 스택: Next.js 16.2.1 App Router, React 19.2.4, Tailwind CSS 4, shadcn/ui, Supabase
 - 인증: Supabase Auth 이메일/비밀번호
 - 보호 라우트: `proxy.ts`에서 `/posts/new`, `/mypage`를 보호하고 비로그인 사용자를 `/login`으로 보냄
-- 데이터: 게시글 목록/상세/작성/삭제가 Supabase `posts` 테이블을 사용하도록 변경됨
-- 빌드: `next/font/google` 제거로 네트워크 없는 환경에서도 `npm.cmd run build` 통과
+- 데이터: 게시글 목록/상세/작성/수정/삭제가 Supabase `posts` 테이블을 사용하도록 연결됨
+- 빌드: `npm run build` Exit code 0 (TypeScript 오류 없음)
 
 ## 최근 수정 사항
 
@@ -41,9 +41,21 @@
 
 ## 남은 작업
 
-- Supabase 대시보드에서 Email Provider와 URL Configuration을 실제 배포 URL 기준으로 확인
-- 실제 브라우저에서 회원가입 -> 로그인 -> 글 작성 -> 글 상세 -> 로그아웃 흐름 확인
-- Ch10 이후 작업: 글 수정, 검색, 이미지 업로드, RLS 정책
+- 브라우저에서 실제 계정으로 글 작성 → 수정 → 삭제 흐름 확인 (④⑤⑥ 시나리오)
+- Ch11: RLS 정책 적용 (SELECT / INSERT / UPDATE / DELETE)
+- Ch12: 이미지 업로드 (Supabase Storage)
+
+## 2026-05-18 Ch10 CRUD 완성
+
+- `Post` 타입에 `user_id?: string` 필드 추가 (Ch11 RLS 보안의 선행 단계인 UI 분기용)
+- `lib/posts.ts` Supabase 쿼리에 `user_id` 컬럼 추가
+- `updatePost(id, { title, content })` 함수 추가: `.eq("id", id).eq("user_id", user.id)` 조건 포함
+- `app/posts/[id]/page.tsx`: 서버에서 현재 사용자 조회 후 `isAuthor` 판별, 작성자에게만 수정/삭제 버튼 표시
+- `app/posts/[id]/edit/page.tsx` 신규 생성: 비작성자 redirect, Server Action으로 updatePost() 호출
+- 이 UI 분기는 UX이며, 실제 보안은 Ch11 RLS에서 DB 정책으로 처리한다.
+- 검증:
+  - `npm.cmd run build`: 통과 (Exit code: 0)
+  - 빌드 라우트 목록에 `ƒ /posts/[id]/edit` 확인됨
 
 ## 2026-05-13 Auth redirect follow-up
 

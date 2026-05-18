@@ -61,10 +61,33 @@
 
 ## 이후 챕터 작업
 
-- [ ] Ch10: 글 수정 기능
+- [x] Ch10: 글 수정 기능
 - [ ] Ch10: 검색 기능
 - [ ] Ch11: RLS 정책 적용
 - [ ] Ch12: 이미지 업로드와 Supabase Storage 연결
+
+## 2026-05-18 Ch10 CRUD 쫐 하부 구현
+
+- [x] `Post` 타입에 `user_id` 추가
+- [x] `lib/posts.ts` Supabase 쿼리에 `user_id` 콜럼 선택
+- [x] `updatePost()` 함수 구현 (`.eq("id").eq("user_id")` 조건 포함)
+- [x] `/posts/[id]` 상세 페이지 작성자 UI 분기 (수정/삭제 버튼)
+- [x] `/posts/[id]/edit` 수정 페이지 신규 생성
+- [x] `npm.cmd run build` 통과
+
+## 2026-05-18 Ch10 브라우저 + 터미널 검증 완료
+
+- [x] `/posts` 목록 표시 확인
+- [x] `/posts/[id]` 상세 표시 + `notFound()` 동작 확인 (`/posts/999` → 404)
+- [x] 비로그인 `/posts/new` → middleware가 `/login` redirect
+- [x] `isAuthor` 분기 — 작성자 수정/삭제 UI / 비작성자 숨김 (코드 검증)
+- [x] `deletePostAction` → `redirect("/posts")` (코드 검증)
+- [x] `npm run build` Exit code: 0
+- [x] `git grep next/router|auth.signIn` — 검출 없음
+- [x] `git grep service_role|sbp_` — 검출 없음
+- [x] AI 실수 5개 항목 전부 이상 없음
+- [x] Supabase CLI `● my-first-web` (Seoul, LINKED) 확인
+- [x] GitHub push + Vercel 배포 (이 커밋)
 
 ## 2026-05-13 실습 글 복구
 

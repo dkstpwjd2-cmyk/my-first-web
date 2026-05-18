@@ -54,8 +54,19 @@
 - 작업 중 완료·변경·새 이슈 발생 시 두 파일을 수시로 갱신한다.
 - 작업 마무리 시 두 파일을 현재 상태에 맞게 업데이트한다.
 
-## 현재 프로젝트 상태 (2026-05-13 기준)
+## Supabase CRUD 규칙 (Ch10)
+
+- `posts` 테이블 컬럼명 임의 변경 금지: `id`, `user_id`, `title`, `content`, `created_at`
+- `user_id`는 폼·URL 입력으로 받지 말 것 — 반드시 서버에서 `user.id`를 코드로 삽입.
+- `update`·`delete`에는 반드시 `.eq("id", postId)` 조건 필요.
+- 작성자 UI 분기(수정/삭제 버튼)는 **UX**이며, 실제 보안은 Ch11 RLS가 담당한다.
+- `lib/supabase/client.ts` 또는 `lib/supabase/server.ts` 사용. `@supabase/supabase-js` 직접 `createClient` 금지.
+- 새 라이브러리 추가 금지 — 기존 스택으로 구현.
+
+## 현재 프로젝트 상태 (2026-05-18 기준)
 
 - Ch8 완료: Supabase DB 연결·마이그레이션·Vercel 배포
-- Ch9 진행 중: Supabase Auth 구현 예정
-- 참고 문서: `ARCHITECTURE.md` § 9 (Auth 플로우 상세)
+- Ch9 완료: Supabase Auth 이메일 로그인/회원가입, `proxy.ts` 미들웨어 라우트 보호
+- Ch10 완료: posts CRUD 연결, `updatePost()` 구현, 작성자 UI 분기
+- 참고 문서: `ARCHITECTURE.md` § 9 (Auth 플로우 상세), § 10 (Ch10 CRUD 라우트)
+- 다음 단계: 검색, Ch11 RLS

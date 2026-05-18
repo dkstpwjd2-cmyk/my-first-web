@@ -19,6 +19,7 @@
 홈 (/)
 ├── 포스트 목록 (/posts)
 │   ├── 포스트 상세 (/posts/[id])
+│   ├── 포스트 수정 (/posts/[id]/edit)      ← Ch10 신규
 │   └── 포스트 작성 (/posts/new)
 ├── 로그인 (/login)
 ├── 회원가입 (/signup)
@@ -32,6 +33,7 @@
 | 홈           | `/`              | `app/page.tsx`                   | 모두               |
 | 포스트 목록  | `/posts`         | `app/posts/page.tsx`             | 모두               |
 | 포스트 상세  | `/posts/[id]`    | `app/posts/[id]/page.tsx`        | 모두               |
+| 포스트 수정  | `/posts/[id]/edit` | `app/posts/[id]/edit/page.tsx` | 로그인 + 작성자   |
 | 포스트 작성  | `/posts/new`     | `app/posts/new/page.tsx`         | 로그인 필요        |
 | 로그인       | `/login`         | `app/login/page.tsx`             | 비로그인만         |
 | 회원가입     | `/signup`        | `app/signup/page.tsx`            | 비로그인만         |
@@ -190,12 +192,26 @@ app/posts/[id]/page.tsx
 │   ├── <CardHeader> 제목 + 메타(작성자, 날짜, 카테고리)
 │   └── <CardContent> 본문
 ├── <Button variant="outline"> "목록으로"
-└── <Button variant="destructive"> "삭제" → <Dialog> 확인
+├── <Button asChild variant="outline"> "수정" → Link /posts/[id]/edit  [isAuthor일 때만]
+└── <Button variant="destructive"> "삭제" → <Dialog> 확인  [isAuthor일 때만]
     └── <Dialog>
         ├── <DialogHeader> "정말 삭제할까요?"
         └── <DialogFooter>
             ├── <Button variant="outline"> 취소
             └── <Button variant="destructive"> 삭제 확인 → Server Action
+```
+
+#### 포스트 수정 (`/posts/[id]/edit`) ← Ch10 신규
+```
+app/posts/[id]/edit/page.tsx  (서버 컴포넌트)
+└── <Card>
+    ├── <CardHeader> "포스트 수정"
+    └── <CardContent>
+        └── <form> (Server Action: updatePostAction)
+            ├── <Input> 제목 (defaultValue=post.title)
+            ├── <Textarea> 내용 (defaultValue=post.content)
+            └── <Button type="submit"> 수정 저장
+비작성자 접근 시 redirect → /posts/[id]
 ```
 
 #### 포스트 작성 (`/posts/new`)
@@ -332,8 +348,8 @@ profiles (1) ──────── (N) posts
 | 챕터  | 상태   | 작업 내용                                                        |
 |------|--------|------------------------------------------------------------------|
 | Ch8  | ✅ 완료 | Supabase 연결, profiles/posts 테이블 생성, Vercel 배포           |
-| Ch9  | 🔄 진행 | Supabase Auth 이메일 로그인/회원가입, middleware.ts 라우트 보호  |
-| Ch10 | 예정    | 포스트 수정, 검색·필터 기능                                       |
+| Ch9  | ✅ 완료 | Supabase Auth 이메일 로그인/회원가입, middleware.ts 라우트 보호  |
+| Ch10 | ✅ 완료 | 포스트 CRUD 연결, 수정/삭제 UI, 작성자 분기                     |
 | Ch11 | 예정    | RLS 정책 적용, 역할 기반 접근 제어                               |
 | Ch12 | 예정    | 댓글, 이미지 업로드 (Supabase Storage)                           |
 
@@ -376,3 +392,37 @@ middleware.ts        ← 라우트 보호 (프로젝트 루트)
 - 실제 설치(package.json): @supabase/supabase-js ^2.105.1, @supabase/ssr ^0.10.2
 - 빌드 오류 발생 시 package.json 실제 버전으로 원인을 확인한다.
 
+---
+
+## 10. Ch10 CRUD 라우트와 함수 (추가)
+
+### 10.1 라우트 목록
+
+| 라우트 | 파일 | 접근 | Server Action |
+|---|---|---|---|
+| `/posts` | `app/posts/page.tsx` | 모두 | 없음 |
+| `/posts/[id]` | `app/posts/[id]/page.tsx` | 모두 | `deletePostAction` |
+| `/posts/[id]/edit` | `app/posts/[id]/edit/page.tsx` | 로그인 + 작성자 | `updatePostAction` |
+| `/posts/new` | `app/posts/new/page.tsx` | 로그인 | `createPostAction` |
+
+### 10.2 `lib/posts.ts` 함수 목록
+
+| 함수 | 역할 |
+|---|---|
+| `getPosts()` | posts 목록 조회 (실습 글 + Supabase DB) |
+| `getPostById(id)` | 단일 포스트 조회 |
+| `createPost({ title, content })` | posts insert (user_id 서버에서 삽입) |
+| `updatePost(id, { title, content })` | posts update (작성자 조건 `.eq("user_id")` 포함) |
+| `deletePostById(id)` | posts delete (작성자 조건 `.eq("user_id")` 포함) |
+| `getCurrentUserPostCount()` | 현재 사용자 글 수 |
+
+### 10.3 작성자 UI 분기 패턴
+
+```ts
+// 서버 컴포넌트에서 조회
+const supabase = await createClient();
+const { data: { user } } = await supabase.auth.getUser();
+
+// 이 isAuthor 체크는 UX(버튼 표시)이며, 실제 보안은 Ch11 RLS가 담당한다.
+const isAuthor = !post?.isPractice && !!user && user.id === post?.user_id;
+```

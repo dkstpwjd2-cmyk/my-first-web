@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,45 +22,51 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { deletePostById, getPostById } from "@/lib/posts";
+import { createClient } from "@/lib/supabase/server";
 
 async function deletePostAction(formData: FormData) {
   "use server";
 
   const id = String(formData.get("id") ?? "");
+  let redirectTo = "/posts";
 
   if (id) {
-    await deletePostById(id);
-    revalidatePath("/posts");
-    revalidatePath(`/posts/${id}`);
+    try {
+      await deletePostById(id);
+      revalidatePath("/posts");
+      revalidatePath(`/posts/${id}`);
+    } catch {
+      // 삭제 실패 시 사용자에게 안내 (500 에러 대신 페이지로 돌아감)
+      redirectTo = `/posts/${id}?error=삭제%EC%97%90%20%EC%8B%A4%ED%8C%A8%ED%96%88%EC%8A%B5%EB%8B%88%EB%8B%A4`;
+    }
   }
 
-  redirect("/posts");
+  redirect(redirectTo);
 }
 
 export default async function PostDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { id } = await params;
+  const { error: pageError } = await searchParams;
   const post = await getPostById(id);
 
+  // 현재 로그인 사용자 조회 — 작성자 UI 분기에 사용
+  // 이 if 문은 UX(버튼 표시)이며, 실제 보안은 Ch11 RLS에서 처리한다.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isAuthor =
+    !post?.isPractice && !!user && user.id === post?.user_id;
+
+  // 없는 글이면 Next.js 404 페이지로 처리
   if (!post) {
-    return (
-      <Card className="rounded-lg shadow-sm">
-        <CardHeader>
-          <CardTitle>포스트를 찾을 수 없습니다</CardTitle>
-          <CardDescription>
-            요청한 포스트가 삭제되었거나 존재하지 않습니다.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button asChild variant="outline">
-            <Link href="/posts">목록으로 돌아가기</Link>
-          </Button>
-        </CardContent>
-      </Card>
-    );
+    notFound();
   }
 
   return (
@@ -76,6 +82,10 @@ export default async function PostDetailPage({
         <CardDescription>작성자: {post.author}</CardDescription>
       </CardHeader>
       <CardContent>
+        {/* 실패 시 URL ?error= 파라미터로 전달된 에러 메시지 */}
+        {pageError && (
+          <p className="mb-2 text-sm text-destructive">{decodeURIComponent(pageError)}</p>
+        )}
         <div className="whitespace-pre-line leading-7 text-foreground">
           {post.content}
         </div>
@@ -85,7 +95,14 @@ export default async function PostDetailPage({
           <Link href="/posts">목록으로 돌아가기</Link>
         </Button>
 
-        {!post.isPractice && (
+        {/* 작성자에게만 수정/삭제 UI 표시. 실제 보안은 Ch11 RLS에서 처리한다. */}
+        {isAuthor && (
+          <Button asChild variant="outline">
+            <Link href={`/posts/${post.id}/edit`}>수정</Link>
+          </Button>
+        )}
+
+        {isAuthor && (
           <Dialog>
             <DialogTrigger asChild>
               <Button type="button" variant="destructive">

@@ -46,6 +46,15 @@
 - 보호 라우트는 `middleware.ts`로 처리한다.
 - Supabase 클라이언트: `createBrowserClient` (클라이언트) / `createServerClient` (서버) 패턴 사용.
 
+## Supabase CRUD Rules (Ch10)
+
+- `posts` 테이블 컬럼명을 임의 변경 금지: `id`, `user_id`, `title`, `content`, `created_at`
+- `user_id`는 입력값(폼·URL)으로 받지 말 것 — 반드시 서버에서 `user.id`를 코드로 삽입.
+- `update`·`delete`에는 반드시 `.eq("id", postId)` 조건 필요.
+- 작성자 UI 분기(수정/삭제 버튼 표시)는 **UX**이며, 실제 보안은 Ch11 RLS가 담당한다.
+- `lib/supabase/client.ts` (`createBrowserClient`) 또는 `lib/supabase/server.ts` (`createServerClient`) 를 사용. `@supabase/supabase-js`에서 직접 `createClient` 생성 금지.
+- 새 라이브러리 추가 금지 — 기존 스택으로 구현.
+
 ## Known AI Mistakes
 
 - Do not use `next/router`; use `next/navigation` when navigation is needed.
@@ -53,6 +62,9 @@
 - Do not add `"use client"` unless interactivity or browser APIs are actually needed.
 - Do not use `supabase.auth.signIn()` (deprecated); use `supabase.auth.signInWithPassword()` instead.
 - Do not expose `service_role` key in any client-side code or public env variables.
+- Do not rename `posts` columns (`authorId`, `body`, `users` 등 금지) — use Ch8 schema as-is.
+- Do not treat client-side `isAuthor` check as security — Ch11 RLS handles actual authorization.
+- Do not add `update`/`delete` without `.eq("id", postId)` condition.
 
 ## Project Memory
 
