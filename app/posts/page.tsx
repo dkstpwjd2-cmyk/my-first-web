@@ -9,17 +9,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { getPosts } from "@/lib/posts";
 import type { Post } from "@/lib/posts";
 
-export default async function PostsPage() {
-  // Ch8의 createClient()는 lib/posts.ts의 getPosts() 내부에서 사용
-  // posts 테이블: id, title, content, created_at, user_id — created_at 내림차순
+export default async function PostsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
+  const query = q?.trim() ?? "";
+
   let posts: Post[] = [];
   let fetchError = false;
 
   try {
-    posts = await getPosts();
+    posts = await getPosts(query || undefined);
   } catch {
     fetchError = true;
   }
@@ -50,13 +56,38 @@ export default async function PostsPage() {
         </Button>
       </section>
 
+      <form action="/posts" method="GET" className="flex gap-2">
+        <Input
+          name="q"
+          defaultValue={query}
+          placeholder="제목 또는 내용 검색"
+          className="max-w-xs"
+        />
+        <Button type="submit" variant="outline">검색</Button>
+        {query && (
+          <Button asChild variant="ghost">
+            <Link href="/posts">초기화</Link>
+          </Button>
+        )}
+      </form>
+
+      {query && (
+        <p className="text-sm text-muted-foreground">
+          &ldquo;{query}&rdquo; 검색 결과 {posts.length}건
+        </p>
+      )}
+
       {/* 빈 상태 */}
       {posts.length === 0 ? (
         <Card className="rounded-lg shadow-sm">
           <CardHeader>
-            <CardTitle>아직 포스트가 없습니다</CardTitle>
+            <CardTitle>
+              {query ? "검색 결과가 없습니다" : "아직 포스트가 없습니다"}
+            </CardTitle>
             <CardDescription>
-              로그인 후 첫 번째 포스트를 작성해 보세요.
+              {query
+                ? "다른 검색어를 입력해 보세요."
+                : "로그인 후 첫 번째 포스트를 작성해 보세요."}
             </CardDescription>
           </CardHeader>
         </Card>

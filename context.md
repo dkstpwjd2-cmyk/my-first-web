@@ -3,7 +3,7 @@
 ## 현재 상태
 
 - 마지막 업데이트: 2026-05-18
-- 완료 챕터: Ch7 아키텍처/UI, Ch8 Supabase 연결/배포, Ch9 Supabase Auth, Ch10 Supabase CRUD (목록/상세/작성/수정/삭제)
+- 완료 챕터: Ch7~Ch12 전체 완료 (CRUD, Auth, 반응/댓글/파일/공유/조회수/검색/아바타, RLS)
 - 기술 스택: Next.js 16.2.1 App Router, React 19.2.4, Tailwind CSS 4, shadcn/ui, Supabase
 - 인증: Supabase Auth 이메일/비밀번호
 - 보호 라우트: `proxy.ts`에서 `/posts/new`, `/mypage`를 보호하고 비로그인 사용자를 `/login`으로 보냄
@@ -45,13 +45,7 @@
 
 ## 남은 작업
 
-- 브라우저에서 실제 계정으로 글 작성 → 수정 → 삭제 흐름 확인 (④⑤⑥ 시나리오)
-- 브라우저에서 실제 계정으로 좋아요/싫어요 토글 흐름 확인
-- 브라우저에서 실제 계정으로 댓글 작성/삭제 흐름 확인
-- 브라우저에서 실제 계정으로 첨부파일 업로드/삭제 흐름 확인
-- 브라우저에서 게시글 공유 버튼 동작 확인
-- Ch11: RLS 정책 적용 (SELECT / INSERT / UPDATE / DELETE)
-- Ch12: 이미지 업로드 (Supabase Storage)
+- 브라우저에서 전체 기능 최종 검증 (좋아요/싫어요, 댓글, 파일업로드, 공유, 조회수, 검색, 아바타 업로드)
 
 ## 2026-05-18 좋아요/싫어요 기능 추가
 
@@ -302,3 +296,38 @@ const isAuthor = !!user && user.id === post.user_id;
 - `npm.cmd run build`: 통과
 - 원격 Supabase DB에 `npx supabase db push --yes`로 마이그레이션 적용 완료
 - 브라우저 증가/새로고침 중복 제한/목록 일관성 검증: 로컬 확인 필요 (DB는 반영됨)
+
+## 2026-05-18 검색 기능 추가 (Ch10)
+
+| 파일 | 변경 | 내용 |
+|---|---|---|
+| `lib/posts.ts` | 수정 | `getPosts(query?)` — Supabase `.or(ilike)` + 실습 글 클라이언트 필터 |
+| `app/posts/page.tsx` | 수정 | `searchParams.q` 수신, 검색 폼 UI, 결과 건수 표시, 빈 상태 문구 분기 |
+
+- 검색어는 `?q=` URL 파라미터로 전달, Server Component 내 `<form method="GET">`으로 처리
+- `npm.cmd run build` 통과
+
+## 2026-05-18 RLS 정책 적용 (Ch11)
+
+| 파일 | 변경 | 내용 |
+|---|---|---|
+| `supabase/migrations/20260518090000_add_rls_policies.sql` | 신규 | `profiles`, `posts` 테이블 RLS 활성화 + SELECT/INSERT/UPDATE/DELETE 정책 |
+
+- `profiles`: SELECT 공개, INSERT/UPDATE 본인(`auth.uid() = id`)
+- `posts`: SELECT 공개, INSERT/UPDATE/DELETE 본인(`auth.uid() = user_id`)
+- `post_reactions`, `post_comments`, `post_attachments`, `post_views` RLS는 각 테이블 마이그레이션에서 이미 적용
+- `npx supabase db push --yes` 완료
+
+## 2026-05-18 프로필 이미지 업로드 (Ch12)
+
+| 파일 | 변경 | 내용 |
+|---|---|---|
+| `supabase/migrations/20260518100000_create_avatars_storage.sql` | 신규 | `avatars` 버킷(공개), Storage RLS(본인 폴더만 쓰기) |
+| `lib/profiles.ts` | 수정 | `getProfile()`, `updateAvatarUrl()` 추가 |
+| `components/AvatarUpload.tsx` | 신규 | 아바타 업로드 클라이언트 컴포넌트 (2MB 제한, 이미지 미리보기) |
+| `app/mypage/page.tsx` | 수정 | AvatarUpload 렌더링 + `updateAvatarAction` Server Action |
+
+- Storage path: `{userId}/avatar.{ext}`, `upsert: true`로 교체
+- 공개 URL에 `?t=timestamp` 캐시버스터 적용
+- `npx supabase db push --yes` 완료
+- `npm.cmd run build` 통과

@@ -92,18 +92,37 @@ const practicePosts: Post[] = [
   },
 ];
 
-export async function getPosts(): Promise<Post[]> {
+export async function getPosts(query?: string): Promise<Post[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let dbQuery = supabase
     .from("posts")
     .select("id, title, content, created_at, user_id")
     .order("created_at", { ascending: false });
+
+  if (query) {
+    dbQuery = dbQuery.or(
+      `title.ilike.%${query}%,content.ilike.%${query}%`
+    );
+  }
+
+  const { data, error } = await dbQuery;
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return withPostSummaries([...(data ?? []).map(mapPostRow), ...practicePosts]);
+  const dbPosts = (data ?? []).map(mapPostRow);
+  const filteredPractice = query
+    ? practicePosts.filter((p) => {
+        const q = query.toLowerCase();
+        return (
+          p.title.toLowerCase().includes(q) ||
+          p.content.toLowerCase().includes(q)
+        );
+      })
+    : practicePosts;
+
+  return withPostSummaries([...dbPosts, ...filteredPractice]);
 }
 
 export async function getPostById(id: string): Promise<Post | null> {
