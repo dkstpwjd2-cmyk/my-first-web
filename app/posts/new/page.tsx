@@ -73,9 +73,17 @@ export default function NewPostPage() {
     const supabase = createClient();
 
     // 이메일 인증 직후 첫 글 작성 시 profiles 행이 없으면 FK violation이 발생할 수 있다.
+    const metadataName = user!.user_metadata?.name;
+    const username =
+      typeof metadataName === "string" && metadataName.trim()
+        ? metadataName.trim().slice(0, 80)
+        : user!.email?.split("@")[0]?.trim().slice(0, 80);
     const { error: profileError } = await supabase
       .from("profiles")
-      .upsert({ id: user!.id }, { onConflict: "id" });
+      .upsert(
+        { id: user!.id, ...(username ? { username } : {}) },
+        { onConflict: "id" }
+      );
     if (profileError) {
       setSubmitting(false);
       setError("프로필 초기화에 실패했습니다. 잠시 후 다시 시도해 주세요.");

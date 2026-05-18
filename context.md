@@ -378,3 +378,16 @@ const isAuthor = !!user && user.id === post.user_id;
 ### 검증 결과
 
 - `npm run build`: Exit code 0 (TypeScript 오류 없음)
+
+## 2026-05-19 작성자 표시 수정
+
+- 문제: Supabase DB 글의 `author`가 항상 기본값 `작성자`로 매핑되어 목록/상세 화면에 `작성자: 작성자`처럼 표시됨.
+- 수정:
+  - `lib/posts.ts`에서 DB 글 요약 생성 시 `profiles.username`을 조회해 `post.author`에 반영.
+  - 기존 글의 프로필 이름이 비어 있어도 로그인한 본인 글은 Auth 이름/이메일 앞부분으로 표시.
+  - `lib/auth.ts`에서 로그인/회원가입 성공 시 프로필 이름을 upsert해 기존 글도 이후 실제 작성자명으로 표시되도록 보강.
+  - `lib/profiles.ts`의 `ensureProfile()`이 선택적으로 `username`을 저장할 수 있게 확장.
+  - `app/posts/new/page.tsx`에서 새 글 작성 전 프로필 upsert 시 회원가입 이름(`user_metadata.name`) 또는 이메일 앞부분을 `username`으로 저장.
+- 검증:
+  - `npm.cmd run build`: 통과
+  - `npm.cmd run lint`: 통과

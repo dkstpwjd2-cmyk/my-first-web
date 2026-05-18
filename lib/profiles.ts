@@ -6,10 +6,14 @@ export type Profile = {
   avatar_url: string | null;
 };
 
-export async function ensureProfile(userId: string) {
+export async function ensureProfile(userId: string, username?: string | null) {
   const supabase = await createClient();
+  const trimmedUsername = username?.trim();
   const { error } = await supabase.from("profiles").upsert(
-    { id: userId },
+    {
+      id: userId,
+      ...(trimmedUsername ? { username: trimmedUsername.slice(0, 80) } : {}),
+    },
     { onConflict: "id" }
   );
 

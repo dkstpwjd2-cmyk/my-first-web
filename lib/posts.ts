@@ -168,7 +168,7 @@ export async function createPost(input: {
     throw new Error("로그인이 필요합니다.");
   }
 
-  await ensureProfile(user.id);
+  await ensureProfile(user.id, getAuthorName(user));
 
   const { data, error } = await supabase
     .from("posts")
@@ -310,17 +310,37 @@ async function withPostSummary(post: Post): Promise<Post> {
 
 async function withPostSummaries(posts: Post[]): Promise<Post[]> {
   const postIds = posts.map((post) => post.id);
-  const [reactionSummaries, commentCounts, viewCounts] = await Promise.all([
+  const userIds = [
+    ...new Set(
+      posts.map((post) => post.user_id).filter((id): id is string => !!id)
+    ),
+  ];
+  const [
+    reactionSummaries,
+    commentCounts,
+    viewCounts,
+    authorNames,
+    currentUserAuthor,
+  ] = await Promise.all([
     getReactionSummaries(postIds),
     getCommentCounts(postIds),
     getViewCounts(postIds),
+    getAuthorNames(userIds),
+    getCurrentUserAuthor(),
   ]);
 
   return posts.map((post) => {
     const reactionSummary = reactionSummaries[post.id];
+    const currentAuthor =
+      currentUserAuthor && post.user_id === currentUserAuthor.id
+        ? currentUserAuthor.name
+        : undefined;
 
     const nextPost = {
       ...post,
+      author: post.user_id
+        ? authorNames[post.user_id] ?? currentAuthor ?? post.author
+        : post.author,
       commentCount: commentCounts[post.id] ?? 0,
       viewCount: viewCounts[post.id] ?? 0,
     };
@@ -336,6 +356,54 @@ async function withPostSummaries(posts: Post[]): Promise<Post[]> {
       currentUserReaction: reactionSummary.currentUserReaction,
     };
   });
+}
+
+async function getAuthorNames(userIds: string[]): Promise<Record<string, string>> {
+  if (userIds.length === 0) {
+    return {};
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, username")
+    .in("id", userIds);
+
+  if (error) {
+    return {};
+  }
+
+  return Object.fromEntries(
+    (data ?? [])
+      .filter((profile) => !!profile.username?.trim())
+      .map((profile) => [profile.id, profile.username!.trim()])
+  );
+}
+
+async function getCurrentUserAuthor(): Promise<{ id: string; name: string } | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return null;
+  }
+
+  return { id: user.id, name: getAuthorName(user) };
+}
+
+function getAuthorName(user: {
+  email?: string;
+  user_metadata?: { name?: unknown };
+}) {
+  const metadataName = user.user_metadata?.name;
+  if (typeof metadataName === "string" && metadataName.trim()) {
+    return metadataName.trim().slice(0, 80);
+  }
+
+  const emailName = user.email?.split("@")[0]?.trim();
+  return (emailName || "\uC791\uC131\uC790").slice(0, 80);
 }
 
 function formatDate(value: Date): string {

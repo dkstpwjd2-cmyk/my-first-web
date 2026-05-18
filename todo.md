@@ -214,3 +214,13 @@
 - [x] `localStorage` key 접두사 `my-first-web:post-view:` 충돌 없음 확인
 - [x] 게시글 삭제 시 첨부파일 Storage + 메타데이터 함께 삭제 확인
 - [x] `npm run build` Exit code 0 최종 확인
+
+## 2026-05-19 작성자 표시 수정
+
+- [x] DB 글 작성자가 고정값 `작성자`로 표시되는 원인 확인
+- [x] 목록/상세 글 조회 시 `profiles.username`을 작성자명으로 반영
+- [x] 기존 글에서 프로필 이름이 비어 있는 로그인 사용자 본인 글 fallback 추가
+- [x] 로그인/회원가입 성공 시 프로필 이름 저장 보강
+- [x] 새 글 작성 전 프로필에 회원가입 이름 또는 이메일 앞부분 저장
+- [x] `npm.cmd run build` 통과
+- [x] `npm.cmd run lint` 통과
