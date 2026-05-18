@@ -412,3 +412,12 @@ const isAuthor = !!user && user.id === post.user_id;
 - 검증:
   - `npm.cmd run lint`: 통과
   - `npm.cmd run build`: 통과
+
+## 2026-05-19 GitHub/Vercel 최신화
+
+- 로컬 작업 트리는 코드 변경 없이 `origin/master`와 같은 커밋(`1505753 Refine home post cards`) 상태였음.
+- 로컬 검증을 다시 수행해 현재 코드 기준 프로덕션 빌드와 lint 통과를 확인.
+- Vercel CLI가 로컬에 설치되어 있지 않아 GitHub `master` push를 통해 Vercel Git 연동 배포를 트리거하는 방식으로 최신화를 진행.
+- 검증:
+  - `npm.cmd run build`: 통과
+  - `npm.cmd run lint`: 통과

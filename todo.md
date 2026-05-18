@@ -241,3 +241,11 @@
 - [x] `상세 보기` 버튼을 카드 하단에 맞춤
 - [x] `npm.cmd run lint` 통과
 - [x] `npm.cmd run build` 통과
+
+## 2026-05-19 GitHub/Vercel 최신화
+
+- [x] 로컬 작업 트리와 `origin/master` 커밋 상태 확인
+- [x] `npm.cmd run build` 통과
+- [x] `npm.cmd run lint` 통과
+- [ ] GitHub `master` push 완료
+- [ ] Vercel Git 연동 production 배포 확인
