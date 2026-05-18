@@ -247,5 +247,5 @@
 - [x] 로컬 작업 트리와 `origin/master` 커밋 상태 확인
 - [x] `npm.cmd run build` 통과
 - [x] `npm.cmd run lint` 통과
-- [ ] GitHub `master` push 완료
-- [ ] Vercel Git 연동 production 배포 확인
+- [x] GitHub `master` push 완료
+- [x] Vercel production 배포 확인 (`READY`)
