@@ -48,20 +48,21 @@ export default async function EditPostPage({
     const title = String(formData.get("title") ?? "");
     const content = String(formData.get("content") ?? "");
 
-    if (title.trim() && content.trim()) {
-      try {
-        await updatePost(id, { title, content });
-        revalidatePath("/posts");
-        revalidatePath(`/posts/${id}`);
-        redirect(`/posts/${id}`);
-      } catch {
-        redirect(
-          `/posts/${id}/edit?error=수정%EC%97%90%20%EC%8B%A4%ED%8C%A8%ED%96%88%EC%8A%B5%EB%8B%88%EB%8B%A4`
-        );
-      }
+    if (!title.trim() || !content.trim()) {
+      redirect(`/posts/${id}/edit`);
     }
 
-    redirect(`/posts/${id}/edit`);
+    try {
+      await updatePost(id, { title, content });
+    } catch {
+      redirect(
+        `/posts/${id}/edit?error=수정%EC%97%90%20%EC%8B%A4%ED%8C%A8%ED%96%88%EC%8A%B5%EB%8B%88%EB%8B%A4`
+      );
+    }
+
+    revalidatePath("/posts");
+    revalidatePath(`/posts/${id}`);
+    redirect(`/posts/${id}`);
   }
 
   return (
