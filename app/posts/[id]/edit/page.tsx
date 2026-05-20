@@ -37,7 +37,38 @@ export default async function EditPostPage({
   } = await supabase.auth.getUser();
 
   if (!user || user.id !== post.user_id) {
-    redirect(`/posts/${id}`);
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[40vh] space-y-4 text-center">
+        <div className="rounded-full bg-destructive/10 p-4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-8 w-8 text-destructive"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+            />
+          </svg>
+        </div>
+        <h2 className="text-xl font-semibold">수정 권한이 없습니다</h2>
+        <p className="text-sm text-muted-foreground max-w-xs">
+          이 게시글의 작성자만 수정할 수 있습니다.
+          <br />
+          RLS(Row Level Security) 정책에 의해 데이터베이스 수준에서도 차단됩니다.
+        </p>
+        <Link
+          href={`/posts/${id}`}
+          className="inline-flex items-center gap-1 text-sm text-primary underline underline-offset-4"
+        >
+          ← 게시글로 돌아가기
+        </Link>
+      </div>
+    );
   }
 
   const attachments = await getAttachments(id);
