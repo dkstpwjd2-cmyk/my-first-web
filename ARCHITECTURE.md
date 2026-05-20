@@ -326,6 +326,28 @@ profiles (1) ──────── (N) posts
 | `posts`  | UPDATE  | 작성자 본인 (`user_id = auth.uid()`) |
 | `posts`  | DELETE  | 작성자 본인 (`user_id = auth.uid()`) |
 
+### 6.4 보안 계층
+
+| 계층 | 역할 | 보안 여부 |
+|---|---|---|
+| UI 분기 | 작성자에게만 수정/삭제 버튼 표시 (`isAuthor`) | UX |
+| 라우트 보호 | 비로그인 사용자의 `/posts/new`, `/mypage` 접근을 `proxy.ts`에서 `/login`으로 redirect | 접근 흐름 제어 |
+| RLS | `posts.user_id`와 `auth.uid()` 기준으로 INSERT/UPDATE/DELETE를 DB에서 강제 | 실제 보안 |
+
+- 클라이언트 if문이나 버튼 숨김은 직접 요청을 막지 못한다.
+- 최종 권한 검사는 Supabase PostgreSQL RLS 정책이 담당한다.
+- `service_role` 키는 RLS를 우회할 수 있으므로 클라이언트 코드나 공개 환경변수에 절대 두지 않는다.
+- RLS SQL은 SQL Editor에만 남기지 않고 `supabase/migrations/20260520020609_add_posts_rls.sql`처럼 마이그레이션으로 관리한다.
+
+### 6.5 Ch11 보호 정책 목록
+
+| 정책 이름 | 작업 | 조건 |
+|---|---|---|
+| `posts are readable by everyone` | SELECT | `using (true)` |
+| `authenticated users can insert own posts` | INSERT | `with check (auth.uid() = user_id)` |
+| `users can update own posts` | UPDATE | `using (auth.uid() = user_id)` + `with check (auth.uid() = user_id)` |
+| `users can delete own posts` | DELETE | `using (auth.uid() = user_id)` |
+
 ---
 
 ## 7. 디자인 토큰 요약

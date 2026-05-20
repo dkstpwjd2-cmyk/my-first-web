@@ -55,7 +55,7 @@
 - 로그인은 `supabase.auth.signInWithPassword()` 사용. 구버전 `auth.signIn()` 사용 금지.
 - 환경변수 이름 고정: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `service_role` 키는 클라이언트 코드에 절대 두지 않는다.
-- 보호 라우트는 `middleware.ts`로 처리한다 (`pages/` 라우터 미들웨어 금지).
+- 보호 라우트는 Next.js 16 기준 `proxy.ts`로 처리한다 (`pages/` 라우터 미들웨어 금지).
 - Supabase 클라이언트: `@supabase/ssr`의 `createBrowserClient` (클라이언트) / `createServerClient` (서버) 패턴 사용.
 - Supabase 대시보드 메뉴 안내는 2026년 5월 기준이다.
 
@@ -67,6 +67,18 @@
 - 작성자 UI 분기(수정/삭제 버튼 표시)는 **UX**이며, 실제 보안은 Ch11 RLS가 담당한다.
 - `lib/supabase/client.ts` 또는 `lib/supabase/server.ts` 사용. `@supabase/supabase-js`에서 직접 `createClient` 생성 금지.
 - 새 라이브러리 추가 금지 — 기존 스택으로 구현.
+
+## Supabase RLS Rules (Ch11)
+
+- 보안은 클라이언트 if문이나 버튼 숨김으로 처리하지 않는다. 작성자 UI 분기는 UX이며, 실제 권한 강제는 Supabase RLS가 담당한다.
+- RLS SQL은 Supabase SQL Editor에만 직접 실행하지 말고 `supabase/migrations/` 마이그레이션 파일로 남긴다.
+- `posts` 정책 기준:
+  - SELECT: 누구나 읽기 가능
+  - INSERT: 로그인 사용자만 본인 `user_id`로 작성 가능 (`auth.uid() = user_id`)
+  - UPDATE: 작성자만 수정 가능, `USING`과 `WITH CHECK` 둘 다 필요
+  - DELETE: 작성자만 삭제 가능
+- `service_role` 키는 RLS를 우회하므로 클라이언트 코드와 공개 환경변수에서 절대 사용하지 않는다.
+- Ch11 마이그레이션 파일: `supabase/migrations/20260520020609_add_posts_rls.sql`
 
 ## Known AI Mistakes
 

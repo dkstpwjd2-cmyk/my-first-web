@@ -473,3 +473,26 @@ const isAuthor = !!user && user.id === post.user_id;
   - 민감 키 grep 결과 없음
   - `auth.signIn()`, `next/router`, 소셜 로그인 패턴 결과 없음
   - RLS 마이그레이션에 SELECT `using (true)`, INSERT/UPDATE `with check`, UPDATE/DELETE `using` 조건 확인
+
+## 2026-05-20 Ch11 RLS 마무리 문서 업데이트
+
+- `posts` 테이블은 Supabase 마이그레이션으로 RLS를 활성화했다.
+- 최종 적용 정책:
+  - SELECT: 누구나 게시글 읽기 가능 (`using (true)`)
+  - INSERT: 로그인 사용자만 본인 `user_id`로 작성 가능 (`with check (auth.uid() = user_id)`)
+  - UPDATE: 작성자만 수정 가능, 수정 후에도 `user_id = auth.uid()` 유지
+  - DELETE: 작성자만 삭제 가능
+- 마이그레이션 파일 경로:
+  - `supabase/migrations/20260520020609_add_posts_rls.sql`
+- 적용 명령:
+  - `npx.cmd supabase db push --yes`
+- 테스트 결과:
+  - 비로그인 `/posts` 조회: 200 성공
+  - 비로그인 `/posts/new` 접근: 307 redirect로 작성 차단
+  - anon REST INSERT 우회 시도: 401 실패
+  - 사용자 A 본인 글 수정/삭제: 코드 경로와 RLS 정책상 허용, 제출용 브라우저 스크린샷 필요
+  - 사용자 B가 사용자 A 글 수정/삭제: UI에서는 수정/삭제 버튼 미표시, 직접 요청은 RLS에서 차단되어야 함. 제출용 브라우저 스크린샷 필요
+- 보안 기준:
+  - 작성자 UI 분기(`isAuthor`)는 UX이며 보안 강제는 RLS가 담당한다.
+  - `service_role` 키는 클라이언트 코드에서 사용하지 않는다.
+  - RLS SQL은 SQL Editor 직접 실행이 아니라 마이그레이션 파일로 관리한다.

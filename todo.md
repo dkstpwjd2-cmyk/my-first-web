@@ -268,3 +268,19 @@
 - [x] anon REST INSERT 우회 시도 401 실패 확인
 - [x] Ch11 실습 내용 정밀 리뷰 및 문서 미세 보완
 - [ ] 사용자 A/B 교차 수정·삭제 브라우저 테스트 및 스크린샷 제출
+
+## 2026-05-20 Ch11 마무리 체크리스트
+
+- [x] posts RLS 마이그레이션 생성 (`20260520020609_add_posts_rls.sql`)
+- [x] Supabase 원격 DB에 `db push` 적용
+- [x] SELECT/INSERT/UPDATE/DELETE 정책 조건 검토
+- [x] 비로그인 조회 및 작성 접근 차단 확인
+- [x] anon REST INSERT 우회 차단 확인
+- [x] 보안 키 노출 grep (`service_role`, `SUPABASE_SERVICE_ROLE`, `sb_secret_`, `sbp_`) 결과 없음
+- [x] `npm.cmd run build` 통과
+- [x] `npm.cmd run lint` 통과
+- [x] GitHub 업로드 완료 (`30dcd4b Add Ch11 posts RLS migration`)
+- [ ] 사용자 A 본인 글 수정/삭제 성공 스크린샷
+- [ ] 사용자 B가 A 글 수정/삭제 실패 스크린샷
+- [ ] Supabase `posts` Policies 화면 스크린샷
+- [ ] Vercel 최신 배포 확인
