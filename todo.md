@@ -280,7 +280,10 @@
 - [x] `npm.cmd run build` 통과
 - [x] `npm.cmd run lint` 통과
 - [x] GitHub 업로드 완료 (`30dcd4b Add Ch11 posts RLS migration`)
-- [ ] 사용자 A 본인 글 수정/삭제 성공 스크린샷
-- [ ] 사용자 B가 A 글 수정/삭제 실패 스크린샷
-- [ ] Supabase `posts` Policies 화면 스크린샷
-- [ ] Vercel 최신 배포 확인
+- [x] 사용자 A 본인 글 수정/삭제 성공 스크린샷
+- [x] 사용자 B가 A 글 수정/삭제 실패 스크린샷
+- [x] Supabase `posts` Policies 화면 스크린샷
+- [x] Vercel 최신 배포 확인
+- [x] Edit 페이지 redirect try-catch 버그 수정 (`app/posts/[id]/edit/page.tsx`)
+- [x] 버그 수정 GitHub push (`4813443 Fix redirect in try-catch bug in edit post Server Action`)
+- [x] Vercel production 재배포

@@ -474,6 +474,15 @@ const isAuthor = !!user && user.id === post.user_id;
   - `auth.signIn()`, `next/router`, 소셜 로그인 패턴 결과 없음
   - RLS 마이그레이션에 SELECT `using (true)`, INSERT/UPDATE `with check`, UPDATE/DELETE `using` 조건 확인
 
+## 2026-05-20 Edit 페이지 redirect 버그 수정
+
+- 문제: `app/posts/[id]/edit/page.tsx`의 `updatePostAction`에서 `redirect()`를 `try-catch` 안에서 호출해 "An unexpected response was received from the server" 오류 발생.
+- 원인: Next.js의 `redirect()`는 내부적으로 특수 에러를 throw하는데, `catch` 블록이 이를 잡아버려 충돌.
+- 수정: `try-catch` 블록은 `updatePost()` 호출만 감싸고, `revalidatePath`와 성공 `redirect()`는 블록 밖으로 이동.
+- 검증:
+  - `npm.cmd run build`: 통과
+  - 브라우저 수정 저장 동작 확인
+
 ## 2026-05-20 Ch11 RLS 마무리 문서 업데이트
 
 - `posts` 테이블은 Supabase 마이그레이션으로 RLS를 활성화했다.
