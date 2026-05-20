@@ -249,3 +249,22 @@
 - [x] `npm.cmd run lint` 통과
 - [x] GitHub `master` push 완료
 - [x] Vercel production 배포 확인 (`READY`)
+
+## 2026-05-20 Ch11 RLS 실습
+
+- [x] `context.md`, `todo.md`, `ARCHITECTURE.md` 상태 확인
+- [x] Ch11 기준과 충돌하는 `ARCHITECTURE.md` 내용 정정
+- [x] `AGENTS.md`, `CLAUDE.md`, `.agent/rules/project.md` 라우트 보호 파일 기준을 `proxy.ts`로 정정
+- [x] Supabase CLI 버전 확인 (`npx.cmd supabase --version`)
+- [x] Supabase 연결 프로젝트 확인 (`my-first-web`, `qxgutxeaolqbkjsfymiu`)
+- [x] `npx.cmd supabase migration new add_posts_rls`로 마이그레이션 생성
+- [x] `supabase/migrations/20260520020609_add_posts_rls.sql`에 posts RLS 정책 작성
+- [x] `npx.cmd supabase db push --yes`로 원격 DB 적용
+- [x] `npm.cmd run build` 재검증
+- [x] `npm.cmd run lint` 재검증
+- [x] 민감 키 grep 재검증
+- [x] 비로그인 `/posts` 조회 200 확인
+- [x] 비로그인 `/posts/new` 307 redirect 확인
+- [x] anon REST INSERT 우회 시도 401 실패 확인
+- [x] Ch11 실습 내용 정밀 리뷰 및 문서 미세 보완
+- [ ] 사용자 A/B 교차 수정·삭제 브라우저 테스트 및 스크린샷 제출

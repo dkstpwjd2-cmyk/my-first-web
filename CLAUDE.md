@@ -43,7 +43,7 @@
 - 로그인은 `supabase.auth.signInWithPassword()` 사용. 구버전 `auth.signIn()` 사용 금지.
 - 환경변수 이름 고정: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `service_role` 키는 클라이언트 코드에 절대 두지 않는다.
-- 보호 라우트는 `middleware.ts`로 처리한다.
+- 보호 라우트는 Next.js 16 기준 `proxy.ts`로 처리한다.
 - Supabase 클라이언트: `createBrowserClient` (클라이언트) / `createServerClient` (서버) 패턴 사용.
 - Supabase 대시보드 메뉴 안내는 2026년 5월 기준이다.
 

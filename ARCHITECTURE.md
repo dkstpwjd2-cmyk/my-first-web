@@ -317,14 +317,14 @@ profiles (1) ──────── (N) posts
 - 한 명의 사용자(profiles)가 여러 개의 포스트(posts)를 작성할 수 있다 → **1:N 관계**
 - `posts.user_id`가 `profiles.id`를 참조한다 (외래 키)
 
-### 6.3 Supabase RLS 정책 (Ch11 예정)
+### 6.3 Supabase RLS 정책 (Ch11 완료)
 
 | 테이블    | 작업     | 허용 조건                        |
 |----------|---------|----------------------------------|
 | `posts`  | SELECT  | 모두 (비로그인 포함)             |
-| `posts`  | INSERT  | 로그인한 사용자 (`auth.uid()`)   |
+| `posts`  | INSERT  | 로그인 사용자 본인 (`user_id = auth.uid()`) |
 | `posts`  | UPDATE  | 작성자 본인 (`user_id = auth.uid()`) |
-| `posts`  | DELETE  | 작성자 본인 또는 admin 역할      |
+| `posts`  | DELETE  | 작성자 본인 (`user_id = auth.uid()`) |
 
 ---
 
@@ -348,10 +348,10 @@ profiles (1) ──────── (N) posts
 | 챕터  | 상태   | 작업 내용                                                        |
 |------|--------|------------------------------------------------------------------|
 | Ch8  | ✅ 완료 | Supabase 연결, profiles/posts 테이블 생성, Vercel 배포           |
-| Ch9  | ✅ 완료 | Supabase Auth 이메일 로그인/회원가입, middleware.ts 라우트 보호  |
+| Ch9  | ✅ 완료 | Supabase Auth 이메일 로그인/회원가입, proxy.ts 라우트 보호       |
 | Ch10 | ✅ 완료 | 포스트 CRUD 연결, 수정/삭제 UI, 작성자 분기                     |
-| Ch11 | 예정    | RLS 정책 적용, 역할 기반 접근 제어                               |
-| Ch12 | 예정    | 댓글, 이미지 업로드 (Supabase Storage)                           |
+| Ch11 | ✅ 완료 | posts RLS 정책 적용, 작성자 기준 접근 제어                       |
+| Ch12 | ✅ 완료 | 댓글, 이미지 업로드 (Supabase Storage)                           |
 
 ---
 
@@ -378,9 +378,9 @@ profiles (1) ──────── (N) posts
 | `/signup` | 비로그인 전용 | 회원가입 폼 표시 | `/`로 redirect |
 
 - **🌐 공개**: 누구나 접근 가능
-- **🔒 보호**: `middleware.ts`가 비인증 사용자를 `/login`으로 redirect
+- **🔒 보호**: `proxy.ts`가 비인증 사용자를 `/login`으로 redirect
 - **작성자 전용 UI**: `isAuthor` 체크 — UX 목적, 실제 보안은 Ch11 RLS
-- 보호 구현: `middleware.ts` (App Router, `pages/` 라우터 미들웨어 금지)
+- 보호 구현: `proxy.ts` (Next.js 16 App Router, `pages/` 라우터 미들웨어 금지)
 
 
 ### 9.3 클라이언트 파일 구조
@@ -391,7 +391,7 @@ lib/
 │   ├── client.ts   ← createBrowserClient (클라이언트 컴포넌트용)
 │   └── server.ts   ← createServerClient (서버 컴포넌트·Server Action용)
 └── auth.ts         ← signUp / signIn / signOut 래퍼 함수
-middleware.ts        ← 라우트 보호 (프로젝트 루트)
+proxy.ts             ← 라우트 보호 (프로젝트 루트, Next.js 16)
 ```
 
 ### 9.4 버전 표기

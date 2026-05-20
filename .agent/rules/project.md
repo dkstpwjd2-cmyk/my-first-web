@@ -42,7 +42,7 @@
 - 로그인: `supabase.auth.signInWithPassword()` — 구버전 `auth.signIn()` 절대 금지.
 - 환경변수 이름 변경 불가: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `service_role` 키는 클라이언트 코드에 절대 두지 않는다.
-- 보호 라우트는 `middleware.ts`로 처리 (프로젝트 루트에 위치).
+- 보호 라우트는 Next.js 16 기준 `proxy.ts`로 처리 (프로젝트 루트에 위치).
 - Supabase 클라이언트:
   - 클라이언트 컴포넌트: `createBrowserClient` (`lib/supabase/client.ts`)
   - 서버 컴포넌트/Server Action: `createServerClient` (`lib/supabase/server.ts`)
@@ -66,7 +66,7 @@
 ## 현재 프로젝트 상태 (2026-05-18 기준)
 
 - Ch8 완료: Supabase DB 연결·마이그레이션·Vercel 배포
-- Ch9 완료: Supabase Auth 이메일 로그인/회원가입, `proxy.ts` 미들웨어 라우트 보호
+- Ch9 완료: Supabase Auth 이메일 로그인/회원가입, `proxy.ts` 라우트 보호
 - Ch10 완료: posts CRUD 연결, `updatePost()` 구현, 작성자 UI 분기
 - 참고 문서: `ARCHITECTURE.md` § 9 (Auth 플로우 상세), § 10 (Ch10 CRUD 라우트)
-- 다음 단계: 검색, Ch11 RLS
+- 다음 단계: 사용자 A/B 교차 수정·삭제 브라우저 테스트 및 제출 스크린샷 정리

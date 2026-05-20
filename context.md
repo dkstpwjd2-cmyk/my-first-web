@@ -425,3 +425,51 @@ const isAuthor = !!user && user.id === post.user_id;
   - `npm.cmd run build`: 통과
   - `npm.cmd run lint`: 통과
   - Vercel production deploy: READY
+
+## 2026-05-19 Vercel 재배포 (로컬-블로그 동기화)
+
+- 로컬 git은 `origin/master`와 동기화된 상태(커밋 `0a613cc`), 커밋/push 불필요.
+- `npx vercel@latest deploy --prod --yes`로 production 재배포 실행.
+- Production alias: `https://my-first-web-xi-seven.vercel.app`
+- Deployment URL: `https://my-first-wvpj01fel-dkstpwjd2-2207s-projects.vercel.app`
+- 검증: Vercel production deploy READY
+
+## 2026-05-20 Ch11 RLS 실습 재정비
+
+- Ch11 기준 확인: 게시글 SELECT는 공개, INSERT/UPDATE/DELETE는 `auth.uid() = posts.user_id` 기준으로 데이터베이스가 강제한다.
+- 기존 `supabase/migrations/20260518090000_add_rls_policies.sql`에 posts RLS가 이미 있었지만, 과제 제출 기준에 맞춰 `supabase/migrations/20260520020609_add_posts_rls.sql`을 Supabase CLI로 새로 생성했다.
+- 새 마이그레이션은 기존 posts 정책명을 `drop policy if exists`로 정리한 뒤 같은 정책명을 재생성하므로 `policy already exists` 오류를 피한다.
+- 정책 조건:
+  - SELECT: `using (true)` to `anon, authenticated`
+  - INSERT: `with check (auth.uid() = user_id)` to `authenticated`
+  - UPDATE: `using (auth.uid() = user_id)` + `with check (auth.uid() = user_id)` to `authenticated`
+  - DELETE: `using (auth.uid() = user_id)` to `authenticated`
+- `ARCHITECTURE.md`, `AGENTS.md`, `CLAUDE.md`, `.agent/rules/project.md`에서 Next.js 16 라우트 보호 파일을 `middleware.ts`가 아니라 실제 구현인 `proxy.ts` 기준으로 맞췄다.
+- `ARCHITECTURE.md`의 Ch11 상태를 완료로 갱신하고, posts DELETE 권한을 "작성자 본인"으로 정정했다.
+- Supabase CLI 확인:
+  - `npx.cmd supabase --version`: 2.100.1
+  - `npx.cmd supabase projects list`: `my-first-web` / `qxgutxeaolqbkjsfymiu` / Northeast Asia (Seoul) / LINKED
+- 원격 적용: `npx.cmd supabase db push --yes`로 `20260520020609_add_posts_rls.sql` 적용 완료.
+- 검증:
+  - `npm.cmd run build`: 통과
+  - `npm.cmd run lint`: 통과
+  - 민감 키 grep(`service_role`, `SUPABASE_SERVICE_ROLE`, `sb_secret_`, `sbp_`) 결과 없음
+  - `auth.signIn()`, `next/router`, 소셜 로그인 패턴 결과 없음
+  - `onAuthStateChange` cleanup에서 `subscription.unsubscribe()` 확인
+  - 비로그인 `/posts`: 200
+  - 비로그인 `/posts/new`: 307
+  - anon REST INSERT 우회 시도: 401로 실패
+- 사용자 A/B 교차 수정·삭제 브라우저 테스트는 실제 로그인 계정 2개가 필요하므로 화면 캡처 제출 단계에서 추가 확인이 필요하다.
+
+## 2026-05-20 Ch11 정밀 리뷰
+
+- 실습 요구사항을 다시 대조한 결과, RLS SQL 조건 자체는 Ch11 기준과 일치한다.
+- 문서 보완:
+  - `ARCHITECTURE.md`의 posts INSERT 설명을 `user_id = auth.uid()` 조건까지 명시하도록 정정했다.
+  - `.agent/rules/project.md`의 다음 단계를 Ch11 이후 남은 제출 검증(사용자 A/B 교차 테스트 및 스크린샷)으로 갱신했다.
+- 재검증:
+  - `npm.cmd run build`: 통과
+  - `npm.cmd run lint`: 통과
+  - 민감 키 grep 결과 없음
+  - `auth.signIn()`, `next/router`, 소셜 로그인 패턴 결과 없음
+  - RLS 마이그레이션에 SELECT `using (true)`, INSERT/UPDATE `with check`, UPDATE/DELETE `using` 조건 확인
