@@ -76,6 +76,15 @@
 - 로딩 UI는 App Router의 `loading.tsx` 파일과 고정 크기 스켈레톤으로 처리한다.
 - 새 라이브러리를 추가하기 전에는 기존 Tailwind/shadcn/ui로 해결 가능한지 먼저 확인하고 이유를 설명한다.
 
+## Verification Rules (Ch13)
+
+- 확인하지 않은 항목은 통과로 쓰지 말고 `확인 필요`로 남긴다.
+- 코드리뷰 우선순위는 보안 > 데이터 정확성 > UX > 성능 순서로 본다.
+- Playwright 테스트 계정은 `TEST_EMAIL`, `TEST_PASSWORD` 환경변수로만 받으며 코드에 직접 쓰지 않는다.
+- E2E는 행복 경로와 거절 경로를 함께 둔다.
+- 배포 검증에서 Vercel CLI가 보여주는 환경변수 이름은 통과로 볼 수 있지만, 실제 값 일치 여부는 대시보드 눈검증 전까지 `확인 필요`로 둔다.
+- Ch13에서는 Playwright 추가가 허용되며, 그 외 새 라이브러리는 기존 스택으로 해결할 수 없는 이유가 있을 때만 추가한다.
+
 ## Known AI Mistakes
 
 - Do not use `next/router`; use `next/navigation` when navigation is needed.

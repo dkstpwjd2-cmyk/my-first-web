@@ -498,3 +498,44 @@ const isAuthor = !post?.isPractice && !!user && user.id === post?.user_id;
 |---|---|
 | `/posts/new` | `app/posts/new/page.tsx` 클라이언트 폼에서 즉시 검증, 제출 중 버튼 비활성화 |
 | `/posts/[id]/edit` | `components/PostEditForm.tsx` 클라이언트 폼에서 즉시 검증, `updatePostAction`에서 서버 측 재검증 |
+
+---
+
+## 12. Ch13 최종 검증 루틴
+
+### 12.1 자동 검증 명령
+
+| 목적 | 명령 |
+|---|---|
+| Production build | `npm.cmd run build` |
+| lint | `npm.cmd run lint` |
+| Playwright E2E | `npm.cmd run test:e2e` |
+| Supabase CLI | `npx.cmd supabase --version`, `npx.cmd supabase projects list` |
+| Vercel CLI | `npx.cmd vercel@latest --version`, `npx.cmd vercel@latest ls`, `npx.cmd vercel@latest env ls`, `npx.cmd vercel@latest logs` |
+
+### 12.2 보안 grep
+
+| 점검 | 명령 |
+|---|---|
+| 민감 키 | `git grep -nE "service_role|SUPABASE_SERVICE_ROLE|sb_secret_|sbp_" -- "app/**" "lib/**" "components/**" "contexts/**" "proxy.ts"` |
+| 구버전 라우터/API | `git grep -nE "next/router|auth\.signIn\(" -- "app/**" "lib/**" "components/**" "contexts/**"` |
+| XSS 위험 | `git grep -nE "dangerouslySetInnerHTML|eval\(" -- "app/**" "components/**"` |
+
+### 12.3 핵심 사용자 흐름
+
+| 흐름 | 기대 결과 | 현재 Ch13 상태 |
+|---|---|---|
+| 비로그인 `/posts` 조회 | 성공 | Production `/posts` 200 확인 |
+| 비로그인 `/posts/new` 접근 | `/login` 이동 | Playwright 통과, Production 307 확인 |
+| 로그인 후 글 작성 | 저장 후 상세 페이지에서 제목/내용 확인 | 테스트 파일 준비, `TEST_EMAIL`/`TEST_PASSWORD` 필요 |
+| 작성자 본인 수정/삭제 | 성공 | Ch13 재확인 필요 |
+| 다른 사용자 수정/삭제 | RLS에서 차단 | Ch13 재확인 필요 |
+
+### 12.4 배포 환경
+
+| 항목 | 값 |
+|---|---|
+| Production alias | `https://my-first-web-xi-seven.vercel.app` |
+| 최신 확인 deployment | `https://my-first-r1k1r6hbx-dkstpwjd2-2207s-projects.vercel.app` |
+| Vercel env 이름 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
+| Supabase project | `my-first-web` / `qxgutxeaolqbkjsfymiu` / Northeast Asia (Seoul) |

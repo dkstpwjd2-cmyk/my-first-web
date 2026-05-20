@@ -309,3 +309,26 @@
 - [x] `vercel env ls production`, `vercel logs` 확인
 - [x] 로컬 dev 서버 HTTP 스모크 확인 (`/posts`, 없는 게시글, 비로그인 `/posts/new` redirect)
 - [ ] 브라우저에서 로딩/빈 상태/없는 게시글/제목 없이 제출/RLS 권한 실패 화면 캡처
+
+## 2026-05-20 Ch13 AI 결과 검증
+
+- [x] `context.md`, `todo.md`, `ARCHITECTURE.md`, `AGENTS.md` 상태 확인
+- [x] Playwright 설치 (`@playwright/test`)
+- [x] `playwright.config.ts` 작성
+- [x] `tests/auth-crud.spec.ts` 작성: 행복 경로 1개, 거절 경로 1개
+- [x] `npm.cmd run build` 통과
+- [x] `npm.cmd run lint` 통과
+- [x] 보안 grep 3개 실행: 민감 키, 구버전 라우터/API, XSS 위험 패턴 결과 없음
+- [x] `npm.cmd audit --omit=dev` 실행 및 취약점 확인 필요 항목 기록
+- [x] Supabase CLI 버전과 연결 프로젝트 확인
+- [x] Vercel CLI 버전, 배포 목록, env 이름, 로그 확인
+- [x] Production URL HTTP 스모크 확인: `/` 200, `/posts` 200, `/posts/new` 307
+- [x] Playwright 거절 경로 실행 통과
+- [x] 검증 보고서 작성 (`docs/ch13-validation-report.md`)
+- [ ] `TEST_EMAIL`, `TEST_PASSWORD` 설정 후 Playwright 행복 경로 실행
+- [ ] Vercel 대시보드에서 env 실제 값 적용 대상 눈검증
+- [ ] Supabase URL Configuration의 localhost/Vercel URL 눈검증
+- [ ] Vercel 배포 URL에서 로그인/글 작성/로그아웃 수동 검증
+- [ ] 사용자 A/B 교차 RLS 수정·삭제 차단 Ch13 재검증
+- [ ] npm audit 취약점 처리 방향 결정(교재 버전 유지 여부 포함)
+- [ ] 제출용 스크린샷/로그 정리

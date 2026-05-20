@@ -546,3 +546,45 @@ const isAuthor = !!user && user.id === post.user_id;
     - `/posts`: 200, `포스트 목록`과 `새 포스트 작성` 표시 확인
     - `/posts/does-not-exist`: 200, `게시글을 찾을 수 없습니다`와 `목록으로 돌아가기` 표시 확인
     - 비로그인 `/posts/new`: 307 → `/login`
+
+## 2026-05-20 Ch13 AI 결과 검증
+
+- 목적: Ch8~Ch12에서 구현한 Supabase 블로그를 테스트, 디버깅, 코드리뷰, 배포 검증 관점으로 확인했다.
+- 추가/변경 파일:
+  - `package.json`, `package-lock.json`: `@playwright/test` devDependency와 `test:e2e`, `test:e2e:ui` 스크립트 추가.
+  - `playwright.config.ts`: Chromium 기반 E2E 설정, 로컬 dev 서버 자동 실행 설정.
+  - `tests/auth-crud.spec.ts`: 로그인 후 글 작성 행복 경로와 비로그인 `/posts/new` 거절 경로 테스트 작성.
+  - `docs/ch13-validation-report.md`: Ch13 최종 검증 보고서 작성.
+- 환경 확인:
+  - `npx.cmd supabase --version`: 2.100.1
+  - `npx.cmd supabase projects list`: `my-first-web` / `qxgutxeaolqbkjsfymiu` / Northeast Asia (Seoul) / LINKED
+  - `npx.cmd vercel@latest --version`: 54.2.0
+  - `.vercel/project.json`: `my-first-web` 프로젝트 연결 확인
+  - `npx.cmd vercel@latest ls`: 최신 Production 배포 `Ready`
+  - `npx.cmd vercel@latest env ls`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` 등록 확인. 실제 값 일치 여부는 Vercel 대시보드에서 확인 필요.
+  - `npx.cmd vercel@latest logs`: 최근 Production 요청 로그에서 `/`, `/posts`, `/login`, `/posts/new` 200/307 확인.
+- 로컬 검증:
+  - `npm.cmd run build`: 통과
+  - `npm.cmd run lint`: 통과
+  - `npm.cmd run test:e2e`: 1 passed, 1 skipped
+  - Playwright 거절 경로: 비로그인 `/posts/new` 접근 시 `/login` 이동과 로그인 폼 표시 확인.
+  - Playwright 행복 경로: `TEST_EMAIL`, `TEST_PASSWORD` 환경변수가 없어 skip. 테스트 파일은 준비됨.
+- 보안/코드리뷰 grep:
+  - 민감 키 grep(`service_role`, `SUPABASE_SERVICE_ROLE`, `sb_secret_`, `sbp_`): 결과 없음
+  - 구버전 라우터/API grep(`next/router`, `auth.signIn(`): 결과 없음
+  - XSS 위험 grep(`dangerouslySetInnerHTML`, `eval(`): 결과 없음
+  - `contexts/AuthContext.tsx`의 `onAuthStateChange` cleanup에서 `subscription.unsubscribe()` 확인.
+  - `pages/`, `middleware.ts` 없음. 라우트 보호는 `proxy.ts` 기준.
+- 추가 보안 확인:
+  - `npm.cmd audit --omit=dev`: 9 vulnerabilities(6 moderate, 3 high) 보고.
+  - 자동 수정 일부는 Next.js를 교재 기준 `16.2.1` 밖으로 올릴 수 있어 이번 실습에서는 버전 변경하지 않고 확인 필요로 기록.
+- 배포 URL HTTP 확인:
+  - `https://my-first-web-xi-seven.vercel.app/`: 200
+  - `https://my-first-web-xi-seven.vercel.app/posts`: 200
+  - `https://my-first-web-xi-seven.vercel.app/posts/new`: 307
+- 확인 필요:
+  - 테스트 계정 환경변수 설정 후 행복 경로 E2E 실행.
+  - 사용자 A/B 교차 RLS 수정·삭제 차단을 Ch13 기준으로 재검증.
+  - Vercel 대시보드의 env 실제 값과 Supabase URL Configuration 눈검증.
+  - npm audit 취약점 처리 방향 결정(보안 패치 vs 교재 고정 버전 정책).
+  - 제출용 Playwright/빌드/grep/배포 검증 스크린샷 저장.
