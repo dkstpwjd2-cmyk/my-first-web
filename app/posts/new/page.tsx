@@ -23,6 +23,12 @@ import {
   buildAttachmentPath,
   type SelectedUpload,
 } from "@/lib/fileUpload";
+import { getFriendlyErrorMessage } from "@/lib/error-message";
+import {
+  hasPostFormErrors,
+  validatePostForm,
+  type PostFormErrors,
+} from "@/lib/post-validation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function NewPostPage() {
@@ -33,6 +39,7 @@ export default function NewPostPage() {
   const [content, setContent] = useState("");
   const [files, setFiles] = useState<SelectedUpload[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<PostFormErrors>({});
   const [submitting, setSubmitting] = useState(false);
 
   if (loading) {
@@ -65,7 +72,14 @@ export default function NewPostPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!title.trim() || !content.trim()) return;
+    if (submitting) return;
+
+    const nextErrors = validatePostForm(title, content);
+    setFieldErrors(nextErrors);
+
+    if (hasPostFormErrors(nextErrors)) {
+      return;
+    }
 
     setSubmitting(true);
     setError(null);
@@ -85,8 +99,9 @@ export default function NewPostPage() {
         { onConflict: "id" }
       );
     if (profileError) {
+      console.error(profileError);
       setSubmitting(false);
-      setError("프로필 초기화에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      setError(getFriendlyErrorMessage(profileError));
       return;
     }
 
@@ -101,8 +116,9 @@ export default function NewPostPage() {
       .single();
 
     if (insertError) {
+      console.error(insertError);
       setSubmitting(false);
-      setError(insertError.message);
+      setError(getFriendlyErrorMessage(insertError));
       return;
     }
 
@@ -116,7 +132,10 @@ export default function NewPostPage() {
     setSubmitting(false);
 
     if (attachmentError) {
-      setError(`글은 저장됐지만 첨부파일 업로드에 실패했습니다. ${attachmentError}`);
+      console.error(attachmentError.cause);
+      setError(
+        `글은 저장됐지만 첨부파일 업로드에 실패했습니다. ${attachmentError.message}`
+      );
       return;
     }
 
@@ -133,7 +152,7 @@ export default function NewPostPage() {
 
       <Card className="rounded-lg shadow-sm">
         <CardContent className="pt-6">
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
             {error && (
               <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
                 {error}
@@ -148,10 +167,22 @@ export default function NewPostPage() {
                 id="title"
                 name="title"
                 required
+                minLength={2}
                 placeholder="제목을 입력하세요"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                disabled={submitting}
+                aria-invalid={Boolean(fieldErrors.title)}
+                aria-describedby={fieldErrors.title ? "title-error" : undefined}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, title: undefined }));
+                }}
               />
+              {fieldErrors.title && (
+                <p id="title-error" className="text-sm text-destructive">
+                  {fieldErrors.title}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -162,11 +193,25 @@ export default function NewPostPage() {
                 id="content"
                 name="content"
                 required
+                minLength={10}
                 className="min-h-72"
                 placeholder="내용을 입력하세요"
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                disabled={submitting}
+                aria-invalid={Boolean(fieldErrors.content)}
+                aria-describedby={
+                  fieldErrors.content ? "content-error" : undefined
+                }
+                onChange={(e) => {
+                  setContent(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, content: undefined }));
+                }}
               />
+              {fieldErrors.content && (
+                <p id="content-error" className="text-sm text-destructive">
+                  {fieldErrors.content}
+                </p>
+              )}
             </div>
 
             <div className="rounded-lg border border-border bg-muted/30 p-4">
@@ -198,7 +243,7 @@ async function uploadAttachments(
   postId: string,
   userId: string,
   files: SelectedUpload[]
-) {
+): Promise<{ message: string; cause: unknown } | null> {
   for (const item of files) {
     const storagePath = buildAttachmentPath(userId, postId, item.file.name);
     const { error: uploadError } = await supabase.storage
@@ -208,7 +253,10 @@ async function uploadAttachments(
       });
 
     if (uploadError) {
-      return `${item.file.name}: ${uploadError.message}`;
+      return {
+        message: `${item.file.name}: ${getFriendlyErrorMessage(uploadError)}`,
+        cause: uploadError,
+      };
     }
 
     const { error: insertError } = await supabase
@@ -224,7 +272,10 @@ async function uploadAttachments(
 
     if (insertError) {
       await supabase.storage.from(ATTACHMENT_BUCKET).remove([storagePath]);
-      return `${item.file.name}: ${insertError.message}`;
+      return {
+        message: `${item.file.name}: ${getFriendlyErrorMessage(insertError)}`,
+        cause: insertError,
+      };
     }
   }
 

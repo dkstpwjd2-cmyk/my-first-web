@@ -373,7 +373,7 @@ profiles (1) ──────── (N) posts
 | Ch9  | ✅ 완료 | Supabase Auth 이메일 로그인/회원가입, proxy.ts 라우트 보호       |
 | Ch10 | ✅ 완료 | 포스트 CRUD 연결, 수정/삭제 UI, 작성자 분기                     |
 | Ch11 | ✅ 완료 | posts RLS 정책 적용, 작성자 기준 접근 제어                       |
-| Ch12 | ✅ 완료 | 댓글, 이미지 업로드 (Supabase Storage)                           |
+| Ch12 | ✅ 완료 | 에러 처리, 로딩/빈 상태, 폼 검증, 사용자 메시지 정리             |
 
 ---
 
@@ -456,3 +456,45 @@ const { data: { user } } = await supabase.auth.getUser();
 // 이 isAuthor 체크는 UX(버튼 표시)이며, 실제 보안은 Ch11 RLS가 담당한다.
 const isAuthor = !post?.isPractice && !!user && user.id === post?.user_id;
 ```
+
+---
+
+## 11. Ch12 UX 상태와 에러 메시지 정책
+
+### 11.1 App Router 상태 파일
+
+| 위치 | 역할 |
+|---|---|
+| `app/error.tsx` | 전역 렌더링 에러 안내. 원문 에러는 `console.error(error)`로만 남기고 화면에는 친절한 메시지와 `reset()` 버튼 표시 |
+| `app/loading.tsx` | 전역 로딩 스켈레톤 |
+| `app/posts/loading.tsx` | `/posts` 목록 카드 스켈레톤 |
+| `app/posts/[id]/loading.tsx` | 게시글 상세 제목/본문 스켈레톤 |
+| `app/posts/[id]/not-found.tsx` | 없는 게시글 안내와 목록 복귀 버튼 |
+
+### 11.2 공통 UX 패턴
+
+- 로딩: 레이아웃 높이가 크게 흔들리지 않도록 고정 높이의 `bg-muted` 스켈레톤을 사용한다.
+- 빈 상태: 반복 목록이 0개일 때 `components/EmptyState.tsx`를 사용한다.
+- 에러 상태: 사용자에게는 해결 가능한 문장만 보여주고, 개발자용 원문 에러는 `console.error`로 남긴다.
+- 권한 실패: 작성자 UI 분기는 UX일 뿐이며, 실제 권한 강제는 Supabase RLS가 담당한다.
+- 폼 검증: `lib/post-validation.ts`에서 제목 2자 이상, 내용 10자 이상 규칙을 공유한다.
+
+### 11.3 에러 메시지 변환 규칙
+
+`lib/error-message.ts`의 `getFriendlyErrorMessage()`를 사용한다.
+
+| 원인 | 사용자 메시지 |
+|---|---|
+| `42501`, `row-level security`, `rls`, `permission denied` | 이 작업을 수행할 권한이 없습니다. |
+| `Failed to fetch`, `fetch failed`, `network` | 인터넷 연결을 확인해주세요. |
+| `not found`, `not_found`, `no rows`, `PGRST116` | 요청한 게시글을 찾을 수 없습니다. |
+| 로그인 인증 실패 | 이메일 또는 비밀번호를 확인해주세요. |
+| 세션/JWT 계열 | 로그인 세션이 만료되었습니다. 다시 로그인해주세요. |
+| 그 외 | 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요. |
+
+### 11.4 폼 위치
+
+| 화면 | 구현 |
+|---|---|
+| `/posts/new` | `app/posts/new/page.tsx` 클라이언트 폼에서 즉시 검증, 제출 중 버튼 비활성화 |
+| `/posts/[id]/edit` | `components/PostEditForm.tsx` 클라이언트 폼에서 즉시 검증, `updatePostAction`에서 서버 측 재검증 |

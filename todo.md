@@ -287,3 +287,25 @@
 - [x] Edit 페이지 redirect try-catch 버그 수정 (`app/posts/[id]/edit/page.tsx`)
 - [x] 버그 수정 GitHub push (`4813443 Fix redirect in try-catch bug in edit post Server Action`)
 - [x] Vercel production 재배포
+
+## 2026-05-20 Ch12 A회차 에러 처리와 UX 개선
+
+- [x] `context.md`, `todo.md`, `ARCHITECTURE.md`, 규칙 문서 상태 확인
+- [x] 실패 케이스 정리: loading, empty, error, auth/session, permission denied, validation
+- [x] `app/error.tsx` 추가 (`"use client"`, `console.error`, `reset()` 다시 시도 버튼)
+- [x] `app/loading.tsx` 추가
+- [x] `app/posts/loading.tsx` 목록 카드 스켈레톤 추가
+- [x] `app/posts/[id]/loading.tsx` 상세 스켈레톤 추가
+- [x] `app/posts/[id]/not-found.tsx` 없는 게시글 안내 추가
+- [x] `lib/error-message.ts` Supabase/네트워크/RLS 에러 메시지 변환 유틸 추가
+- [x] `lib/post-validation.ts` 제목/내용 폼 검증 규칙 추가
+- [x] `/posts/new` 클라이언트 검증, 제출 중 비활성화, 원문 에러 로그 분리 적용
+- [x] `/posts/[id]/edit` 클라이언트 검증 폼(`components/PostEditForm.tsx`)과 Server Action 검증 적용
+- [x] 로그인/회원가입 원문 Auth 에러 노출 방지
+- [x] 댓글/반응/조회수/첨부파일/프로필 이미지 에러 메시지와 개발자 로그 분리
+- [x] `npm.cmd run lint` 통과
+- [x] `npm.cmd run build` 통과
+- [x] Ch12 grep 보안/구버전 API 재검증
+- [x] `vercel env ls production`, `vercel logs` 확인
+- [x] 로컬 dev 서버 HTTP 스모크 확인 (`/posts`, 없는 게시글, 비로그인 `/posts/new` redirect)
+- [ ] 브라우저에서 로딩/빈 상태/없는 게시글/제목 없이 제출/RLS 권한 실패 화면 캡처

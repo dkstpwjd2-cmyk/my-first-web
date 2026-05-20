@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { ensureProfile } from "@/lib/profiles";
+import { getFriendlyErrorMessage } from "@/lib/error-message";
 
 export type ReactionType = "like" | "dislike";
 
@@ -108,9 +109,10 @@ export async function togglePostReaction(
   try {
     await ensureProfile(user.id);
   } catch (error) {
+    console.error(error);
     return {
       summary: await getReactionSummary(postId),
-      error: error instanceof Error ? error.message : "반응 저장에 실패했습니다.",
+      error: getFriendlyErrorMessage(error),
     };
   }
 
@@ -122,9 +124,10 @@ export async function togglePostReaction(
     .maybeSingle();
 
   if (existingError) {
+    console.error(existingError);
     return {
       summary: await getReactionSummary(postId),
-      error: existingError.message,
+      error: getFriendlyErrorMessage(existingError),
     };
   }
 
@@ -136,9 +139,10 @@ export async function togglePostReaction(
       .eq("user_id", user.id);
 
     if (error) {
+      console.error(error);
       return {
         summary: await getReactionSummary(postId),
-        error: error.message,
+        error: getFriendlyErrorMessage(error),
       };
     }
   } else {
@@ -153,9 +157,10 @@ export async function togglePostReaction(
     );
 
     if (error) {
+      console.error(error);
       return {
         summary: await getReactionSummary(postId),
-        error: error.message,
+        error: getFriendlyErrorMessage(error),
       };
     }
   }

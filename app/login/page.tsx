@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { getFriendlyErrorMessage } from "@/lib/error-message";
 
 export default function LoginPage() {
   const { signInWithEmail } = useAuth();
@@ -32,7 +33,8 @@ export default function LoginPage() {
     setLoading(false);
 
     if (error) {
-      setError(error.message);
+      console.error(error);
+      setError(getFriendlyErrorMessage(error));
       return;
     }
 

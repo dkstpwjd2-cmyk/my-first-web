@@ -11,6 +11,7 @@ import {
   buildAttachmentPath,
   type SelectedUpload,
 } from "@/lib/fileUpload";
+import { getFriendlyErrorMessage } from "@/lib/error-message";
 import { createClient } from "@/lib/supabase/client";
 
 type AttachmentManagerProps = {
@@ -61,7 +62,8 @@ export default function AttachmentManager({
         });
 
       if (uploadError) {
-        setErrorMsg(`${item.file.name}: ${uploadError.message}`);
+        console.error(uploadError);
+        setErrorMsg(`${item.file.name}: ${getFriendlyErrorMessage(uploadError)}`);
         setBusy(false);
         return;
       }
@@ -81,7 +83,8 @@ export default function AttachmentManager({
 
       if (insertError) {
         await supabase.storage.from(ATTACHMENT_BUCKET).remove([storagePath]);
-        setErrorMsg(`${item.file.name}: ${insertError.message}`);
+        console.error(insertError);
+        setErrorMsg(`${item.file.name}: ${getFriendlyErrorMessage(insertError)}`);
         setBusy(false);
         return;
       }
@@ -125,7 +128,8 @@ export default function AttachmentManager({
         .remove([attachment.storagePath]);
 
       if (removeError) {
-        setErrorMsg(removeError.message);
+        console.error(removeError);
+        setErrorMsg(getFriendlyErrorMessage(removeError));
         setBusy(false);
         return;
       }
@@ -139,7 +143,8 @@ export default function AttachmentManager({
       .eq("user_id", userId);
 
     if (deleteMetaError) {
-      setErrorMsg(deleteMetaError.message);
+      console.error(deleteMetaError);
+      setErrorMsg(getFriendlyErrorMessage(deleteMetaError));
       setBusy(false);
       return;
     }
@@ -196,7 +201,13 @@ export default function AttachmentManager({
         files={files}
         disabled={busy}
         onChange={setFiles}
-        onError={setMessage}
+        onError={(nextMessage) => {
+          if (nextMessage) {
+            setErrorMsg(nextMessage);
+          } else {
+            setMessage(null);
+          }
+        }}
       />
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

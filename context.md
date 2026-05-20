@@ -505,3 +505,44 @@ const isAuthor = !!user && user.id === post.user_id;
   - 작성자 UI 분기(`isAuthor`)는 UX이며 보안 강제는 RLS가 담당한다.
   - `service_role` 키는 클라이언트 코드에서 사용하지 않는다.
   - RLS SQL은 SQL Editor 직접 실행이 아니라 마이그레이션 파일로 관리한다.
+
+## 2026-05-20 Ch12 A회차 에러 처리와 UX 개선
+
+- Ch12 목표: 새 기능 추가보다 로딩, 빈 상태, 에러, 권한 실패, 폼 검증 메시지를 사용자 친화적으로 정리했다.
+- 추가한 App Router 상태 파일:
+  - `app/error.tsx`: 전역 에러 UI. `"use client"` 컴포넌트이며 원문 에러는 `console.error(error)`로 남기고 화면에는 친절한 안내와 `reset()` 다시 시도 버튼만 표시한다.
+  - `app/loading.tsx`: 전역 로딩 스켈레톤.
+  - `app/posts/loading.tsx`: `/posts` 목록 카드 스켈레톤.
+  - `app/posts/[id]/loading.tsx`: 상세/하위 구간 제목·본문 자리 스켈레톤.
+  - `app/posts/[id]/not-found.tsx`: 없는 게시글 안내 화면과 목록 복귀 버튼.
+- 적용한 화면별 UX 상태:
+  - `/posts`: 기존 빈 상태 유지, 목록 조회 실패 시 `EmptyState`에 사용자 메시지 표시 및 개발자 콘솔 로그 유지.
+  - `/posts/[id]`: 없는 게시글은 not-found 화면으로 안내, 삭제 실패는 원문 에러 대신 변환된 메시지를 query string으로 표시.
+  - `/posts/new`: 제목/내용 클라이언트 검증, 제출 중 입력/버튼 비활성화, Supabase/Profile/Storage 오류는 콘솔에 원문을 남기고 화면에는 변환 메시지만 표시.
+  - `/posts/[id]/edit`: `components/PostEditForm.tsx` 클라이언트 폼으로 제목/내용 검증과 제출 중 버튼 비활성화 적용. Server Action에서도 같은 검증을 한 번 더 수행한다.
+  - 로그인/회원가입: Supabase Auth 원문 에러를 화면에 그대로 노출하지 않고 `lib/error-message.ts` 변환 메시지를 표시한다.
+  - 댓글/반응/조회수/첨부파일/프로필 이미지: 사용자 메시지와 개발자 로그를 분리했다.
+- 폼 검증 규칙:
+  - 제목 필수, 최소 2자.
+  - 내용 필수, 최소 10자.
+  - 검증 메시지는 input/textarea 아래에 표시한다.
+  - 제출 중에는 중복 제출을 막기 위해 버튼을 비활성화한다.
+- Supabase/RLS 에러 메시지 변환 규칙:
+  - `42501`, `row-level security`, `rls`, `permission denied` → `이 작업을 수행할 권한이 없습니다.`
+  - `Failed to fetch`, `fetch failed`, `network` → `인터넷 연결을 확인해주세요.`
+  - `not found`, `not_found`, `no rows`, `PGRST116` → `요청한 게시글을 찾을 수 없습니다.`
+  - 로그인 인증 실패 → `이메일 또는 비밀번호를 확인해주세요.`
+  - 세션/JWT 계열 → `로그인 세션이 만료되었습니다. 다시 로그인해주세요.`
+  - 기본값 → `일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.`
+- 검증:
+  - `npm.cmd run lint`: 통과
+  - `npm.cmd run build`: 통과
+  - 민감 키 grep(`service_role`, `SUPABASE_SERVICE_ROLE`, `sb_secret_`, `sbp_`) 결과 없음
+  - 구버전/금지 API grep(`next/router`, `auth.signIn(`) 결과 없음
+  - 사용자 화면 원문 에러 노출 점검: `error.message` 직접 표시 경로 없음. 내부 throw와 `lib/error-message.ts` 변환용 추출만 남음.
+  - `npx.cmd vercel@latest env ls production`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`가 Production 환경에 등록됨. 값은 Encrypted로 표시되어 실제 값은 대시보드 확인 필요.
+  - `npx.cmd vercel@latest logs`: 최근 `/`, `/posts`, `/posts/new`, `/mypage`, `/posts/[id]`, `/posts/[id]/edit` 요청 200 로그 확인.
+  - 로컬 dev 서버 HTTP 스모크:
+    - `/posts`: 200, `포스트 목록`과 `새 포스트 작성` 표시 확인
+    - `/posts/does-not-exist`: 200, `게시글을 찾을 수 없습니다`와 `목록으로 돌아가기` 표시 확인
+    - 비로그인 `/posts/new`: 307 → `/login`

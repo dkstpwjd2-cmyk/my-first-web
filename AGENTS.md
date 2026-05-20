@@ -67,6 +67,15 @@
 - `service_role` 키는 RLS를 우회하므로 클라이언트 코드와 공개 환경변수에서 절대 사용하지 않는다.
 - Ch11 마이그레이션 파일: `supabase/migrations/20260520020609_add_posts_rls.sql`
 
+## Error & UX Rules (Ch12)
+
+- 사용자 화면에 Supabase 원문 에러 코드, stack trace, `42501` 같은 내부 메시지를 그대로 노출하지 않는다.
+- 개발자 추적을 위해 원문 에러는 호출부에서 `console.error(error)`로 남긴다.
+- 사용자 메시지는 `lib/error-message.ts`의 `getFriendlyErrorMessage()` 변환 규칙을 우선 사용한다.
+- 게시글 폼 검증은 `lib/post-validation.ts` 기준을 공유한다: 제목 필수/2자 이상, 내용 필수/10자 이상.
+- 로딩 UI는 App Router의 `loading.tsx` 파일과 고정 크기 스켈레톤으로 처리한다.
+- 새 라이브러리를 추가하기 전에는 기존 Tailwind/shadcn/ui로 해결 가능한지 먼저 확인하고 이유를 설명한다.
+
 ## Known AI Mistakes
 
 - Do not use `next/router`; use `next/navigation` when navigation is needed.
@@ -74,6 +83,8 @@
 - Do not add `"use client"` unless interactivity or browser APIs are actually needed.
 - Do not use `supabase.auth.signIn()` (deprecated); use `supabase.auth.signInWithPassword()` instead.
 - Do not expose `service_role` key in any client-side code or public env variables.
+- Do not show raw Supabase errors, `42501`, stack traces, or RLS internals to users.
+- Do not remove `console.error` when replacing user-facing error messages.
 - Do not rename `posts` columns (`authorId`, `body`, `users` 등 금지) — use Ch8 schema as-is.
 - Do not treat client-side `isAuthor` check as security — Ch11 RLS handles actual authorization.
 - Do not add `update`/`delete` without `.eq("id", postId)` condition.

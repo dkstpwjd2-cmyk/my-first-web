@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
+import { getFriendlyErrorMessage } from "@/lib/error-message";
 import { createClient } from "@/lib/supabase/client";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -53,8 +54,9 @@ export default function AvatarUpload({
       .upload(path, file, { upsert: true });
 
     if (uploadError) {
+      console.error(uploadError);
       setStatus("error");
-      setMessage("업로드에 실패했습니다. 다시 시도해 주세요.");
+      setMessage(getFriendlyErrorMessage(uploadError));
       return;
     }
 
@@ -69,9 +71,10 @@ export default function AvatarUpload({
       setPreview(publicUrl);
       setStatus("done");
       setMessage("프로필 이미지가 업데이트되었습니다.");
-    } catch {
+    } catch (error) {
+      console.error(error);
       setStatus("error");
-      setMessage("이미지 저장에 실패했습니다.");
+      setMessage(getFriendlyErrorMessage(error));
     }
   }
 

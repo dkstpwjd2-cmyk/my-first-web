@@ -27,6 +27,10 @@ import {
 } from "@/components/ui/dialog";
 import { getAttachments } from "@/lib/attachments";
 import { createComment, deleteComment, getComments } from "@/lib/comments";
+import {
+  getFriendlyErrorMessage,
+  getSafeUserMessage,
+} from "@/lib/error-message";
 import { deletePostById, getPostById } from "@/lib/posts";
 import { togglePostReaction } from "@/lib/reactions";
 import type { ReactionType } from "@/lib/reactions";
@@ -42,8 +46,11 @@ async function deletePostAction(formData: FormData) {
       await deletePostById(id);
       revalidatePath("/posts");
       revalidatePath(`/posts/${id}`);
-    } catch {
-      redirectTo = `/posts/${id}?error=삭제%EC%97%90%20%EC%8B%A4%ED%8C%A8%ED%96%88%EC%8A%B5%EB%8B%88%EB%8B%A4`;
+    } catch (error) {
+      console.error(error);
+      redirectTo = `/posts/${id}?error=${encodeURIComponent(
+        getFriendlyErrorMessage(error)
+      )}`;
     }
   }
   redirect(redirectTo);
@@ -89,6 +96,7 @@ export default async function PostDetailPage({
 }) {
   const { id } = await params;
   const { error: pageError } = await searchParams;
+  const pageErrorMessage = getSafeUserMessage(pageError);
   const post = await getPostById(id);
 
   if (!post) notFound();
@@ -125,9 +133,9 @@ export default async function PostDetailPage({
 
       <CardContent className="space-y-6">
         {/* 에러 안내 */}
-        {pageError && (
+        {pageErrorMessage && (
           <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {decodeURIComponent(pageError)}
+            {pageErrorMessage}
           </p>
         )}
 

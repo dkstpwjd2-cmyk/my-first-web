@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getFriendlyErrorMessage } from "@/lib/error-message";
 
 type ViewRow = {
   post_id: string;
@@ -58,9 +59,10 @@ export async function incrementPostView(
   });
 
   if (error) {
+    console.error(error);
     return {
       viewCount: await getViewCount(postId),
-      error: error.message,
+      error: getFriendlyErrorMessage(error),
     };
   }
 

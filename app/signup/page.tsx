@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { getFriendlyErrorMessage } from "@/lib/error-message";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -43,7 +44,8 @@ export default function SignupPage() {
     setLoading(false);
 
     if (error) {
-      setError(error.message);
+      console.error(error);
+      setError(getFriendlyErrorMessage(error));
       return;
     }
 

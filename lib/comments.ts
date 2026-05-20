@@ -1,4 +1,5 @@
 import { ensureProfile } from "@/lib/profiles";
+import { getFriendlyErrorMessage } from "@/lib/error-message";
 import { createClient } from "@/lib/supabase/server";
 
 const MAX_COMMENT_LENGTH = 500;
@@ -107,9 +108,10 @@ export async function createComment(
   try {
     await ensureProfile(user.id);
   } catch (error) {
+    console.error(error);
     return {
       comments: await getComments(postId),
-      error: error instanceof Error ? error.message : "댓글 저장에 실패했습니다.",
+      error: getFriendlyErrorMessage(error),
     };
   }
 
@@ -121,9 +123,10 @@ export async function createComment(
   });
 
   if (error) {
+    console.error(error);
     return {
       comments: await getComments(postId),
-      error: error.message,
+      error: getFriendlyErrorMessage(error),
     };
   }
 
@@ -154,9 +157,10 @@ export async function deleteComment(
     .eq("user_id", user.id);
 
   if (error) {
+    console.error(error);
     return {
       comments: await getComments(postId),
-      error: error.message,
+      error: getFriendlyErrorMessage(error),
     };
   }
 

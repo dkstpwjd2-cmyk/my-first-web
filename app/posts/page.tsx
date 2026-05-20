@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { getFriendlyErrorMessage } from "@/lib/error-message";
 import { getPosts } from "@/lib/posts";
 import type { Post } from "@/lib/posts";
 
@@ -27,11 +28,14 @@ export default async function PostsPage({
 
   let posts: Post[] = [];
   let fetchError = false;
+  let fetchErrorMessage = "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
 
   try {
     posts = await getPosts(query || undefined);
-  } catch {
+  } catch (error) {
+    console.error(error);
     fetchError = true;
+    fetchErrorMessage = getFriendlyErrorMessage(error);
   }
 
   if (fetchError) {
@@ -40,7 +44,7 @@ export default async function PostsPage({
         <PageHeader title="포스트 목록" />
         <EmptyState
           title="목록을 불러오지 못했습니다"
-          description="잠시 후 다시 시도해 주세요."
+          description={fetchErrorMessage}
         />
       </div>
     );

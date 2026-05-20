@@ -3,16 +3,18 @@ import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import AttachmentManager from "@/components/AttachmentManager";
-import FormActions from "@/components/FormActions";
 import PageHeader from "@/components/PageHeader";
-import { Button } from "@/components/ui/button";
+import PostEditForm from "@/components/PostEditForm";
 import {
   Card,
   CardContent,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { getAttachments } from "@/lib/attachments";
+import {
+  getFriendlyErrorMessage,
+  getSafeUserMessage,
+} from "@/lib/error-message";
+import { hasPostFormErrors, validatePostForm } from "@/lib/post-validation";
 import { getPostById, updatePost } from "@/lib/posts";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,6 +27,7 @@ export default async function EditPostPage({
 }) {
   const { id } = await params;
   const { error: pageError } = await searchParams;
+  const pageErrorMessage = getSafeUserMessage(pageError);
   const post = await getPostById(id);
 
   if (!post || post.isPractice) {
@@ -59,7 +62,7 @@ export default async function EditPostPage({
         <p className="text-sm text-muted-foreground max-w-xs">
           이 게시글의 작성자만 수정할 수 있습니다.
           <br />
-          RLS(Row Level Security) 정책에 의해 데이터베이스 수준에서도 차단됩니다.
+          작성자 계정으로 다시 로그인한 뒤 시도해 주세요.
         </p>
         <Link
           href={`/posts/${id}`}
@@ -78,16 +81,26 @@ export default async function EditPostPage({
 
     const title = String(formData.get("title") ?? "");
     const content = String(formData.get("content") ?? "");
+    const validationErrors = validatePostForm(title, content);
 
-    if (!title.trim() || !content.trim()) {
-      redirect(`/posts/${id}/edit`);
+    if (hasPostFormErrors(validationErrors)) {
+      redirect(
+        `/posts/${id}/edit?error=${encodeURIComponent(
+          validationErrors.title ??
+            validationErrors.content ??
+            "입력값을 확인해주세요."
+        )}`
+      );
     }
 
     try {
       await updatePost(id, { title, content });
-    } catch {
+    } catch (error) {
+      console.error(error);
       redirect(
-        `/posts/${id}/edit?error=수정%EC%97%90%20%EC%8B%A4%ED%8C%A8%ED%96%88%EC%8A%B5%EB%8B%88%EB%8B%A4`
+        `/posts/${id}/edit?error=${encodeURIComponent(
+          getFriendlyErrorMessage(error)
+        )}`
       );
     }
 
@@ -102,47 +115,13 @@ export default async function EditPostPage({
 
       <Card className="rounded-lg shadow-sm">
         <CardContent className="pt-6">
-          <form action={updatePostAction} className="space-y-5">
-            {pageError && (
-              <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {decodeURIComponent(pageError)}
-              </p>
-            )}
-
-            <div className="space-y-2">
-              <label htmlFor="title" className="text-sm font-medium">
-                제목
-              </label>
-              <Input
-                id="title"
-                name="title"
-                required
-                defaultValue={post.title}
-                placeholder="제목을 입력하세요"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="content" className="text-sm font-medium">
-                내용
-              </label>
-              <Textarea
-                id="content"
-                name="content"
-                required
-                className="min-h-72"
-                defaultValue={post.content}
-                placeholder="내용을 입력하세요"
-              />
-            </div>
-
-            <FormActions>
-              <Button type="submit">수정 저장</Button>
-              <Button asChild type="button" variant="outline">
-                <Link href={`/posts/${id}`}>취소</Link>
-              </Button>
-            </FormActions>
-          </form>
+          <PostEditForm
+            postId={id}
+            initialTitle={post.title}
+            initialContent={post.content}
+            pageMessage={pageErrorMessage}
+            action={updatePostAction}
+          />
 
           {/* 첨부파일 관리 - 폼과 분리된 독립 영역 */}
           <div className="mt-6 rounded-lg border border-border bg-muted/30 p-4">

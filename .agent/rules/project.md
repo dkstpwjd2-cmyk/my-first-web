@@ -63,10 +63,21 @@
 - `lib/supabase/client.ts` 또는 `lib/supabase/server.ts` 사용. `@supabase/supabase-js` 직접 `createClient` 금지.
 - 새 라이브러리 추가 금지 — 기존 스택으로 구현.
 
-## 현재 프로젝트 상태 (2026-05-18 기준)
+## 에러 처리와 UX 규칙 (Ch12)
+
+- 사용자 화면에는 Supabase 원문 에러 코드, stack trace, `42501` 같은 내부 메시지를 그대로 보여주지 않는다.
+- 개발자 확인용 원문 에러는 호출부에서 `console.error(error)`로 남긴다.
+- 사용자 메시지는 `lib/error-message.ts`의 `getFriendlyErrorMessage()`를 우선 사용한다.
+- 게시글 작성/수정 검증은 `lib/post-validation.ts` 기준을 공유한다: 제목 필수/2자 이상, 내용 필수/10자 이상.
+- 로딩 상태는 App Router의 `loading.tsx`와 고정 크기 스켈레톤으로 처리한다.
+- 새 라이브러리를 추가하기 전 기존 Tailwind/shadcn/ui로 해결 가능한지 먼저 확인한다.
+
+## 현재 프로젝트 상태 (2026-05-20 기준)
 
 - Ch8 완료: Supabase DB 연결·마이그레이션·Vercel 배포
 - Ch9 완료: Supabase Auth 이메일 로그인/회원가입, `proxy.ts` 라우트 보호
 - Ch10 완료: posts CRUD 연결, `updatePost()` 구현, 작성자 UI 분기
-- 참고 문서: `ARCHITECTURE.md` § 9 (Auth 플로우 상세), § 10 (Ch10 CRUD 라우트)
-- 다음 단계: 사용자 A/B 교차 수정·삭제 브라우저 테스트 및 제출 스크린샷 정리
+- Ch11 완료: posts RLS 정책 적용
+- Ch12 A회차 완료: error/loading UI, 폼 검증, 사용자 메시지 변환 유틸 적용
+- 참고 문서: `ARCHITECTURE.md` § 9 (Auth), § 10 (CRUD), § 11 (Ch12 UX)
+- 다음 단계: Ch12 브라우저 화면 캡처와 Vercel 로그 확인
