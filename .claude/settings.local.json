@@ -6,7 +6,8 @@
       "Bash(git push:*)",
       "Bash(ls c:/my-first-web/postcss*)",
       "Bash(npx.cmd supabase *)",
-      "Bash(npm.cmd run *)"
+      "Bash(npm.cmd run *)",
+      "Bash(npx vercel@latest deploy --prod --yes)"
     ]
   }
 }
