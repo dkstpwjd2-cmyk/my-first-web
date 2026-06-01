@@ -541,7 +541,7 @@ const isAuthor = !!user && user.id === post.user_id;
   - 구버전/금지 API grep(`next/router`, `auth.signIn(`) 결과 없음
   - 사용자 화면 원문 에러 노출 점검: `error.message` 직접 표시 경로 없음. 내부 throw와 `lib/error-message.ts` 변환용 추출만 남음.
   - `npx.cmd vercel@latest env ls production`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`가 Production 환경에 등록됨. 값은 Encrypted로 표시되어 실제 값은 대시보드 확인 필요.
-  - `npx.cmd vercel@latest logs`: 최근 `/`, `/posts`, `/posts/new`, `/mypage`, `/posts/[id]`, `/posts/[id]/edit` 요청 200 로그 확인.
+  - `npx.cmd vercel@latest logs`: 최근 Production 요청 로그에서 `/`, `/posts`, `/posts/new`, `/mypage`, `/posts/[id]`, `/posts/[id]/edit` 요청 200 로그 확인.
   - 로컬 dev 서버 HTTP 스모크:
     - `/posts`: 200, `포스트 목록`과 `새 포스트 작성` 표시 확인
     - `/posts/does-not-exist`: 200, `게시글을 찾을 수 없습니다`와 `목록으로 돌아가기` 표시 확인
