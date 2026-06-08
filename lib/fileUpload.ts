@@ -103,7 +103,7 @@ export function buildAttachmentPath(
   const extension = getFileExtension(fileName);
   const safeName = fileName
     .replace(/\.[^/.]+$/, "")
-    .replace(/[^a-zA-Z0-9가-힣._-]+/g, "-")
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 80);
